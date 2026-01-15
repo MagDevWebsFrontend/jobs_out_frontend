@@ -27,12 +27,12 @@
         </p>
         
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
-          <UIButton size="lg" class="px-8">
+          <UiButton size="lg" class="px-8">
             <NuxtLink to="/auth/register">Encontrar empleo</NuxtLink>
-          </UIButton>
-          <UIButton variant="outline" size="lg" class="px-8">
+          </UiButton>
+          <UiButton variant="outline" size="lg" class="px-8">
             <NuxtLink to="#como-funciona">Ver cómo funciona</NuxtLink>
-          </UIButton>
+          </UiButton>
         </div>
         
         <!-- Stats -->

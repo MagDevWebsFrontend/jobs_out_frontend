@@ -11,20 +11,20 @@
       </p>
       
       <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-        <UIButton 
+        <UiButton 
           size="lg" 
           class="px-8 bg-white text-blue-600 hover:bg-gray-100"
         >
           <NuxtLink to="/auth/register">Crear cuenta gratis</NuxtLink>
-        </UIButton>
+        </UiButton>
         
-        <UIButton 
+        <UiButton 
           variant="outline" 
           size="lg" 
           class="px-8 border-white text-white hover:bg-white/10"
         >
           <NuxtLink to="/auth/login">Iniciar sesión</NuxtLink>
-        </UIButton>
+        </UiButton>
       </div>
       
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-4xl mx-auto">

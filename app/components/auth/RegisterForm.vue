@@ -6,34 +6,35 @@
     </div>
     
     <form @submit.prevent="handleSubmit" class="space-y-5">
+      <UiInput
+        v-model="form.nombre"
+        label="Nombre completo"
+        placeholder="Juan Pérez"
+        required
+        :error="errors.nombre"
+      />
+      
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <UIInput
-          v-model="form.firstName"
-          label="Nombre"
-          placeholder="Juan"
+        <UiInput
+          v-model="form.username"
+          label="Nombre de usuario"
+          placeholder="juanperez"
           required
-          :error="errors.firstName"
+          :error="errors.username"
+          hint="Entre 3 y 20 caracteres. Letras, números y guiones bajos."
         />
         
-        <UIInput
-          v-model="form.lastName"
-          label="Apellido"
-          placeholder="Pérez"
+        <UiInput
+          v-model="form.telefono_e164"
+          label="Teléfono"
+          placeholder="+584141234567"
           required
-          :error="errors.lastName"
+          :error="errors.telefono_e164"
+          hint="Formato E.164: +58XXXXXXXXXX"
         />
       </div>
       
-      <UIInput
-        v-model="form.username"
-        label="Nombre de usuario"
-        placeholder="juan_perez"
-        required
-        :error="errors.username"
-        hint="Entre 3 y 20 caracteres. Letras, números y guiones bajos."
-      />
-      
-      <UIInput
+      <UiInput
         v-model="form.email"
         label="Correo electrónico"
         type="email"
@@ -43,64 +44,81 @@
         hint="Lo usaremos para notificaciones importantes"
       />
       
-      <UIInput
-        v-model="form.password"
-        label="Contraseña"
-        type="password"
-        placeholder="••••••••"
-        required
-        :error="errors.password"
-        hint="Mínimo 8 caracteres, una mayúscula y un número"
-      />
-      
-      <UIInput
-        v-model="form.confirmPassword"
-        label="Confirmar contraseña"
-        type="password"
-        placeholder="••••••••"
-        required
-        :error="errors.confirmPassword"
-      />
-      
-      <!-- Tipo de cuenta -->
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-2">
-          ¿Qué tipo de cuenta necesitas?
-        </label>
-        <div class="grid grid-cols-2 gap-3">
-          <button
-            type="button"
-            :class="[
-              'p-4 border rounded-lg text-center transition-all',
-              form.accountType === 'candidate' 
-                ? 'border-blue-600 bg-blue-50 text-blue-700' 
-                : 'border-gray-300 hover:border-gray-400 text-gray-700'
-            ]"
-            @click="form.accountType = 'candidate'"
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <UiInput
+          v-model="form.password"
+          label="Contraseña"
+          type="password"
+          placeholder="••••••••"
+          required
+          :error="errors.password"
+          hint="Mínimo 8 caracteres, una mayúscula y un número"
+        />
+        
+        <UiInput
+          v-model="form.confirmPassword"
+          label="Confirmar contraseña"
+          type="password"
+          placeholder="••••••••"
+          required
+          :error="errors.confirmPassword"
+        />
+      </div>
+
+      <!-- Provincias y Municipios -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Provincia
+          </label>
+          <select 
+            v-model="form.provincia_id"
+            @change="handleProvinciaChange"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500"
+            required
           >
-            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-            <span class="font-medium">Busco trabajo</span>
-          </button>
-          
-          <button
-            type="button"
-            :class="[
-              'p-4 border rounded-lg text-center transition-all',
-              form.accountType === 'employer' 
-                ? 'border-blue-600 bg-blue-50 text-blue-700' 
-                : 'border-gray-300 hover:border-gray-400 text-gray-700'
-            ]"
-            @click="form.accountType = 'employer'"
+            <option value="">Selecciona una provincia</option>
+            <option 
+              v-for="provincia in provincias" 
+              :key="provincia.id" 
+              :value="provincia.id"
+            >
+              {{ provincia.nombre }}
+            </option>
+          </select>
+          <p v-if="errors.provincia_id" class="mt-1 text-sm text-red-600">
+            {{ errors.provincia_id }}
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">
+            Municipio
+          </label>
+          <select 
+            v-model="form.municipio_id"
+            :disabled="!form.provincia_id"
+            class="w-full rounded-lg border border-gray-300 px-3 py-2.5 text-gray-900 placeholder-gray-400 focus:border-primary-500 focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:bg-gray-50 disabled:text-gray-500"
+            required
           >
-            <svg class="w-6 h-6 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            <span class="font-medium">Soy empleador</span>
-          </button>
+            <option value="">Selecciona un municipio</option>
+            <option 
+              v-for="municipio in municipiosFiltrados" 
+              :key="municipio.id" 
+              :value="municipio.id"
+            >
+              {{ municipio.nombre }}
+            </option>
+          </select>
+          <p v-if="errors.municipio_id" class="mt-1 text-sm text-red-600">
+            {{ errors.municipio_id }}
+          </p>
+          <p v-if="!form.provincia_id" class="mt-1 text-sm text-gray-500">
+            Primero selecciona una provincia
+          </p>
         </div>
       </div>
+      
       
       <!-- Términos y condiciones -->
       <div class="flex items-start">
@@ -132,14 +150,14 @@
         </label>
       </div>
       
-      <UIButton 
+      <UiButton 
         type="submit" 
         :loading="loading" 
         class="w-full"
         :disabled="!form.terms"
       >
         Crear mi cuenta
-      </UIButton>
+      </UiButton>
     </form>
     
     <div class="text-center text-sm text-gray-600">
@@ -152,28 +170,74 @@
 </template>
 
 <script setup lang="ts">
+// Datos de ejemplo - luego reemplazarás con llamadas a tu API
+const provincias = ref([
+  { id: '1', nombre: 'Distrito Nacional' },
+  { id: '2', nombre: 'Santo Domingo' },
+  { id: '3', nombre: 'Santiago' },
+  { id: '4', nombre: 'La Vega' },
+  { id: '5', nombre: 'San Cristóbal' },
+])
+
+const municipios = ref([
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afa6', nombre: 'Santo Domingo Este', provincia_id: '2' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afa7', nombre: 'Santo Domingo Norte', provincia_id: '2' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afa8', nombre: 'Santo Domingo Oeste', provincia_id: '2' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afa9', nombre: 'Boca Chica', provincia_id: '2' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afb0', nombre: 'Los Alcarrizos', provincia_id: '2' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afb1', nombre: 'Santiago de los Caballeros', provincia_id: '3' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afb2', nombre: 'Tamboril', provincia_id: '3' },
+  { id: '3fa85f64-5717-4562-b3fc-2c963f66afb3', nombre: 'Villa González', provincia_id: '3' },
+])
+
 const form = reactive({
-  firstName: '',
-  lastName: '',
+  nombre: '',
   username: '',
   email: '',
   password: '',
   confirmPassword: '',
-  accountType: 'candidate', // 'candidate' o 'employer'
+  telefono_e164: '',
+  provincia_id: '',
+  municipio_id: '',
+  accountType: 'candidate',
   terms: false,
   newsletter: true
 })
 
 const errors = reactive<Record<string, string>>({})
 const loading = ref(false)
+const municipiosFiltrados = ref<typeof municipios.value>([])
+
+const handleProvinciaChange = () => {
+  // Limpiar municipio cuando cambia la provincia
+  form.municipio_id = ''
+  
+  // Filtrar municipios según la provincia seleccionada
+  if (form.provincia_id) {
+    municipiosFiltrados.value = municipios.value.filter(
+      m => m.provincia_id === form.provincia_id
+    )
+  } else {
+    municipiosFiltrados.value = []
+  }
+}
+
+const validateTelefono = (telefono: string) => {
+  // Validación básica de formato E.164
+  const regex = /^\+\d{1,3}\d{6,14}$/
+  return regex.test(telefono)
+}
 
 const handleSubmit = async () => {
   loading.value = true
   Object.keys(errors).forEach(key => errors[key] = '')
   
   // Validaciones
-  if (!form.firstName.trim()) errors.firstName = 'El nombre es obligatorio'
-  if (!form.lastName.trim()) errors.lastName = 'El apellido es obligatorio'
+  if (!form.nombre.trim()) {
+    errors.nombre = 'El nombre completo es obligatorio'
+  } else if (form.nombre.length < 3) {
+    errors.nombre = 'El nombre debe tener al menos 3 caracteres'
+  }
   
   if (!form.username.trim()) {
     errors.username = 'El nombre de usuario es obligatorio'
@@ -183,6 +247,12 @@ const handleSubmit = async () => {
     errors.username = 'Máximo 20 caracteres'
   } else if (!/^[a-zA-Z0-9_]+$/.test(form.username)) {
     errors.username = 'Solo letras, números y guiones bajos'
+  }
+  
+  if (!form.telefono_e164) {
+    errors.telefono_e164 = 'El teléfono es obligatorio'
+  } else if (!validateTelefono(form.telefono_e164)) {
+    errors.telefono_e164 = 'Formato inválido. Usa: +58XXXXXXXXXX'
   }
   
   if (!form.email) {
@@ -205,6 +275,14 @@ const handleSubmit = async () => {
     errors.confirmPassword = 'Las contraseñas no coinciden'
   }
   
+  if (!form.provincia_id) {
+    errors.provincia_id = 'Selecciona una provincia'
+  }
+  
+  if (!form.municipio_id) {
+    errors.municipio_id = 'Selecciona un municipio'
+  }
+  
   if (!form.terms) {
     alert('Debes aceptar los términos y condiciones')
   }
@@ -212,8 +290,26 @@ const handleSubmit = async () => {
   const hasErrors = Object.values(errors).some(error => error)
   
   if (!hasErrors && form.terms) {
+    // Preparar datos para la API
+    const payload = {
+      nombre: form.nombre,
+      username: form.username,
+      email: form.email,
+      password_hash: form.password, // Nota: Normalmente esto se hashea en el backend
+      telefono_e164: form.telefono_e164,
+      municipio_id: form.municipio_id
+      // accountType no va en el payload inicial según tus parámetros
+    }
+    
+    console.log('Register attempt:', payload)
+    
     // Aquí iría la llamada a la API
-    console.log('Register attempt:', form)
+    // Ejemplo:
+    // const { data, error } = await useFetch('/api/auth/register', {
+    //   method: 'POST',
+    //   body: payload
+    // })
+    
     await new Promise(resolve => setTimeout(resolve, 1500)) // Simulación
     
     // Redirigir según el tipo de cuenta
@@ -228,4 +324,7 @@ const handleSubmit = async () => {
   
   loading.value = false
 }
+
+// Inicializar municipios filtrados
+handleProvinciaChange()
 </script>

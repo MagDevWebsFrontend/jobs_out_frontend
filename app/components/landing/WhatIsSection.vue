@@ -88,9 +88,9 @@
           </div>
           
           <div class="mt-8">
-            <UIButton>
+            <UiButton>
               <NuxtLink to="/auth/register">Descubre más</NuxtLink>
-            </UIButton>
+            </UiButton>
           </div>
         </div>
       </div>

@@ -84,9 +84,9 @@
       </div>
       
       <div class="text-center mt-12">
-        <UIButton size="lg">
+        <UiButton size="lg">
           <NuxtLink to="/auth/register">Comenzar ahora</NuxtLink>
-        </UIButton>
+        </UiButton>
       </div>
     </div>
   </section>
