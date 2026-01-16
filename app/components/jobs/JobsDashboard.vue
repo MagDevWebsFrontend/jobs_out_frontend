@@ -1,6 +1,25 @@
 <!-- components/jobs/JobsDashboard.vue -->
 <template>
   <div class="space-y-8">
+    <!-- BARRA SUPERIOR CON ACCIONES -->
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Oportunidades Laborales</h1>
+        <p class="text-gray-600 mt-1">Encuentra y publica oportunidades de trabajo</p>
+      </div>
+      
+      <!-- BOTÓN NUEVA PUBLICACIÓN EN BARRA (Desktop) -->
+      <UiButton 
+        @click="nuevaPublicacion"
+        class="bg-blue-600 hover:bg-blue-700 text-white hidden md:flex"
+      >
+        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        Nueva Publicación
+      </UiButton>
+    </div>
+    
     <!-- Componente de búsqueda -->
     <JobSearchSection 
       @filtros-limpiados="recargarPublicaciones"
@@ -105,15 +124,41 @@
             : 'Vuelve más tarde para ver nuevas oportunidades.'
           }}
         </p>
-        <UiButton 
-          v-if="busquedaActiva"
-          @click="limpiarBusqueda"
-          variant="outline"
-        >
-          Ver todas las publicaciones
-        </UiButton>
+        
+        <div class="space-x-3">
+          <UiButton 
+            v-if="busquedaActiva"
+            @click="limpiarBusqueda"
+            variant="outline"
+          >
+            Ver todas las publicaciones
+          </UiButton>
+          
+          <!-- Botón para crear publicación cuando no hay resultados -->
+          <UiButton 
+            @click="nuevaPublicacion"
+            class="bg-blue-600 hover:bg-blue-700 text-white"
+          >
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg>
+            Crear nueva publicación
+          </UiButton>
+        </div>
       </div>
     </div>
+    
+    <!-- BOTÓN FLOTANTE PARA MÓVIL (FAB) -->
+    <button
+      @click="nuevaPublicacion"
+      class="md:hidden fixed bottom-6 right-6 w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg flex items-center justify-center z-50 transition-transform hover:scale-105 active:scale-95"
+      aria-label="Crear nueva publicación"
+    >
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+      </svg>
+      <span class="sr-only">Nueva Publicación</span>
+    </button>
   </div>
 </template>
 
@@ -167,6 +212,20 @@ onMounted(async () => {
     console.error('Error en JobsDashboard:', err)
   }
 })
+
+// Manejador para nueva publicación
+const nuevaPublicacion = () => {
+  console.log('📝 Redirigiendo a formulario de nueva publicación')
+  
+  // Redirigir a la página de creación de publicación
+  // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
+  navigateTo('/jobs/formJob')
+  
+  // Alternativas si necesitas diferentes rutas:
+  // navigateTo('/jobs/crear')
+  // navigateTo('/crear-publicacion')
+  // navigateTo('/publicaciones/nueva')
+}
 
 // Recargar publicaciones cuando se limpian filtros
 const recargarPublicaciones = () => {

@@ -32,7 +32,7 @@
       aria-labelledby="user-menu-button"
     >
       <NuxtLink
-        to="/jobs/profile"
+        to="/profile"
         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
         role="menuitem"
       >
