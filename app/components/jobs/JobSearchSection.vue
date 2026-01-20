@@ -237,24 +237,47 @@
 </template>
 
 <script setup lang="ts">
-import { usePublicaciones } from '~/composables/usePublicaciones'
+import type { Provincia, Municipio } from '~/types/publicaciones'
 
-const {
-  loading,
-  provincias,
-  municipios,
-  aplicarFiltrosConFiltros,
-  limpiarFiltros: limpiarFiltrosAPI,
-  buscarPorTexto,
-  filtros: filtrosAPI
-} = usePublicaciones()
+/* =========================
+   PROPS
+========================= */
+const props = defineProps<{
+  provincias: Provincia[]
+  municipios: Municipio[]
+  loading: boolean
+}>()
 
-// Estado local para la UI
-const showFilters = ref(false)
-const searchQuery = ref('')
+/* =========================
+   EMITS
+========================= */
+const emit = defineEmits<{
+  buscar: [{
+    busqueda?: string
+    provincia_id?: string
+    municipio_id?: string
+    modo?: string
+    jornada?: string
+    experiencia_min?: number
+  }]
+  limpiar: []
+}>()
 
-// Filtros locales (no se aplican hasta que el usuario presione Buscar)
-const filtrosLocal = reactive({
+/* =========================
+   ESTADO LOCAL (UI)
+========================= */
+const showFilters = ref<boolean>(false)
+const searchQuery = ref<string>('')
+
+interface FiltrosBusquedaLocal {
+  provincia_id: string
+  municipio_id: string
+  modo: string
+  jornada: string
+  experiencia_min: number
+}
+
+const filtrosLocal = reactive<FiltrosBusquedaLocal>({
   provincia_id: '',
   municipio_id: '',
   modo: '',
@@ -262,110 +285,91 @@ const filtrosLocal = reactive({
   experiencia_min: 0
 })
 
-// Sincronizar búsqueda con el API cuando se monta
-onMounted(() => {
-  searchQuery.value = filtrosAPI.busqueda || ''
-  filtrosLocal.provincia_id = filtrosAPI.provincia_id || ''
-  filtrosLocal.municipio_id = filtrosAPI.municipio_id || ''
-  filtrosLocal.modo = filtrosAPI.modo || ''
-  filtrosLocal.jornada = filtrosAPI.jornada || ''
+/* =========================
+   COMPUTED
+========================= */
+const hayFiltrosActivos = computed<boolean>(() => {
+  return Boolean(
+    searchQuery.value.trim() ||
+    filtrosLocal.provincia_id ||
+    filtrosLocal.municipio_id ||
+    filtrosLocal.modo ||
+    filtrosLocal.jornada ||
+    filtrosLocal.experiencia_min > 0
+  )
 })
 
-// Computed
-const hayFiltrosActivos = computed(() => {
-  return searchQuery.value.trim() || 
-         filtrosLocal.provincia_id ||
-         filtrosLocal.municipio_id ||
-         filtrosLocal.modo ||
-         filtrosLocal.jornada ||
-         filtrosLocal.experiencia_min > 0
-})
-
-const municipiosFiltrados = computed(() => {
+const municipiosFiltrados = computed<Municipio[]>(() => {
   if (!filtrosLocal.provincia_id) return []
-  return municipios.value.filter(m => m.provincia_id === filtrosLocal.provincia_id)
+  return props.municipios.filter(
+    m => m.provincia_id === filtrosLocal.provincia_id
+  )
 })
 
-const provinciaNombre = computed(() => {
-  return provincias.value.find(p => p.id === filtrosLocal.provincia_id)?.nombre || 'Desconocida'
+const provinciaNombre = computed<string>(() => {
+  return (
+    props.provincias.find(
+      p => p.id === filtrosLocal.provincia_id
+    )?.nombre || 'Desconocida'
+  )
 })
 
-const municipioNombre = computed(() => {
-  return municipiosFiltrados.value.find(m => m.id === filtrosLocal.municipio_id)?.nombre || 'Desconocido'
+const municipioNombre = computed<string>(() => {
+  return (
+    municipiosFiltrados.value.find(
+      m => m.id === filtrosLocal.municipio_id
+    )?.nombre || 'Desconocido'
+  )
 })
 
-// Funciones de formato
-const formatoModo = (modo: string) => {
+/* =========================
+   FORMATOS
+========================= */
+const formatoModo = (modo: string): string => {
   const map: Record<string, string> = {
-    'presencial': 'Presencial',
-    'hibrido': 'Híbrido',
-    'remoto': 'Remoto'
+    presencial: 'Presencial',
+    hibrido: 'Híbrido',
+    remoto: 'Remoto'
   }
   return map[modo] || modo
 }
 
-const formatoJornada = (jornada: string) => {
+const formatoJornada = (jornada: string): string => {
   const map: Record<string, string> = {
-    'tiempo_completo': 'Tiempo Completo',
-    'medio_tiempo': 'Medio Tiempo',
-    'por_horas': 'Por Horas',
-    'flexible': 'Flexible'
+    tiempo_completo: 'Tiempo Completo',
+    medio_tiempo: 'Medio Tiempo',
+    por_horas: 'Por Horas',
+    flexible: 'Flexible'
   }
   return map[jornada] || jornada
 }
 
-// Funciones
+/* =========================
+   ACCIONES
+========================= */
 const toggleFilters = () => {
   showFilters.value = !showFilters.value
 }
 
-const buscar = async () => {
-  console.log('🔍 Buscando con filtros:', {
-    busqueda: searchQuery.value,
-    ...filtrosLocal
+const buscar = () => {
+  emit('buscar', {
+    busqueda: searchQuery.value.trim() || undefined,
+    provincia_id: filtrosLocal.provincia_id || undefined,
+    municipio_id: filtrosLocal.municipio_id || undefined,
+    modo: filtrosLocal.modo || undefined,
+    jornada: filtrosLocal.jornada || undefined,
+    experiencia_min: filtrosLocal.experiencia_min || undefined
   })
-  
-  try {
-    // Si hay búsqueda por texto
-    if (searchQuery.value.trim()) {
-      await buscarPorTexto(searchQuery.value.trim())
-    }
-    
-    // Aplicar otros filtros (provincia, municipio, modo, jornada)
-    await aplicarFiltrosConFiltros({
-      provincia_id: filtrosLocal.provincia_id || undefined,
-      municipio_id: filtrosLocal.municipio_id || undefined,
-      modo: filtrosLocal.modo || undefined,
-      jornada: filtrosLocal.jornada || undefined,
-      experiencia_min: filtrosLocal.experiencia_min > 0 ? filtrosLocal.experiencia_min : undefined
-    })
-    
-    // El filtro de experiencia se aplicará localmente en el componente que consume los datos
-  } catch (error) {
-    console.error('Error en búsqueda:', error)
-  }
 }
 
-const limpiar = async () => {
-  console.log('🧹 Limpiando todos los filtros')
-  
-  // Limpiar estado local
+const limpiar = () => {
   searchQuery.value = ''
   filtrosLocal.provincia_id = ''
   filtrosLocal.municipio_id = ''
   filtrosLocal.modo = ''
   filtrosLocal.jornada = ''
   filtrosLocal.experiencia_min = 0
-  
-  // Limpiar filtros en la API
-  await limpiarFiltrosAPI()
-  
-  showFilters.value = false
-  emit('filtros-limpiados')
-}
 
-// Emitir eventos
-const emit = defineEmits<{
-  'filtros-limpiados': []
-}>()
+  emit('limpiar')
+}
 </script>

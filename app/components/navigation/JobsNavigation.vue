@@ -18,7 +18,7 @@
         </div>
 
         <!-- Menú de usuario -->
-        <div class="ml-4 relative">
+        <div>
           <JobsUserMenu />
         </div>
       </div>

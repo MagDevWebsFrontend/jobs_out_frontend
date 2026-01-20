@@ -74,7 +74,11 @@ export const usePublicaciones = () => {
       })
       
       if (response.success && response.data) {
-        publicaciones.value = response.data
+        if (filtros.offset && filtros.offset > 0) {
+          publicaciones.value.push(...response.data)
+        } else {
+          publicaciones.value = response.data
+        }
         total.value = response.pagination?.total || 0
         hasMore.value = response.pagination?.hasMore || false
         

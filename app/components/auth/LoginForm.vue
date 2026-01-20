@@ -81,42 +81,25 @@ const form = reactive({
 const errors = reactive<Record<string, string>>({})
 const loading = ref(false)
 
+// en components/auth/LoginForm (script setup)
+import { useAuthStore } from '@/stores/auth'
+
+const auth = useAuthStore()
+
 const handleSubmit = async () => {
   loading.value = true
-  errors.username = ''
-  errors.password = ''
-  
-  // Validación simple
-  if (!form.username.trim()) {
-    errors.username = 'El nombre de usuario es obligatorio'
-  } else if (form.username.length < 3) {
-    errors.username = 'Mínimo 3 caracteres'
+  // validaciones...
+  const result = await auth.login(form.username, form.password)
+  if (result.success) {
+    // redirigir al dashboard o al redirect query
+    console.log("entro bien a la condi")
+    const redirect = useRoute().query.redirect as string || '/jobs'
+    navigateTo(redirect)
+    console.log("debio redirigir")
+  } else {
+    // muestra error amigable
+    errors.password = 'Credenciales incorrectas' // ejemplo
   }
-  
-  if (!form.password) {
-    errors.password = 'La contraseña es obligatoria'
-  } else if (form.password.length < 6) {
-    errors.password = 'Mínimo 6 caracteres'
-  }
-  
-  if (!errors.username && !errors.password) {
-    // Aquí iría la llamada a la API
-    console.log('Login attempt:', form)
-    await new Promise(resolve => setTimeout(resolve, 1500)) // Simulación
-    alert('Login exitoso (simulación)')
-    navigateTo('/jobs/') // Redirigir al dashboard
-  }
-  
   loading.value = false
-}
-
-const loginWithGoogle = () => {
-  console.log('Login con Google')
-  // Implementar OAuth con Google
-}
-
-const loginWithGithub = () => {
-  console.log('Login con GitHub')
-  // Implementar OAuth con GitHub
 }
 </script>

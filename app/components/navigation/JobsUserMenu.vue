@@ -89,24 +89,23 @@
 </template>
 
 <script setup lang="ts">
-// Datos del usuario (por ahora improvisados)
-const user = {
-  name: 'Juan Pérez',
-  email: 'juan@example.com'
-}
+import { useAuthStore } from '~/stores/auth'
 
+const auth = useAuthStore()
 const isUserMenuOpen = ref(false)
 
-// Computed properties para datos del usuario
-const userName = computed(() => user.name)
-const userInitials = computed(() => {
-  const names = user.name.split(' ')
-  return names.length >= 2 
-    ? `${names[0][0]}${names[1][0]}`
-    : user.name.substring(0, 2)
+const userName = computed(() => {
+  return auth.user?.name || auth.user?.username || 'Usuario'
 })
 
-// Funciones para manejar el menú
+const userInitials = computed(() => {
+  if (!auth.user?.name) return 'U'
+  const names = auth.user.name.split(' ')
+  return names.length >= 2
+    ? `${names[0][0]}${names[1][0]}`
+    : names[0].substring(0, 2)
+})
+
 const toggleUserMenu = () => {
   isUserMenuOpen.value = !isUserMenuOpen.value
 }
@@ -115,13 +114,7 @@ const closeMenus = () => {
   isUserMenuOpen.value = false
 }
 
-// Manejar logout
-const handleLogout = () => {
-  // Aquí iría la lógica de logout
-  console.log('Cerrando sesión...')
-  navigateTo('/auth/login')
+const handleLogout = async () => {
+  await auth.logout()
 }
-
-// Cerrar menú al hacer clic fuera del componente
-
 </script>

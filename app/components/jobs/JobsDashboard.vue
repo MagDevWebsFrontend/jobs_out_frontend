@@ -21,9 +21,14 @@
     </div>
     
     <!-- Componente de búsqueda -->
-    <JobSearchSection 
-      @filtros-limpiados="recargarPublicaciones"
-    />
+    <JobSearchSection
+      :loading="loading"
+      :provincias="publicacionesStore.provincias"
+      :municipios="publicacionesStore.municipios"
+      @buscar="aplicarBusqueda"
+      @limpiar="limpiarBusquedaCompleta"
+/>
+
     
     <!-- Loading -->
     <div v-if="loading && publicaciones.length === 0" class="flex justify-center items-center py-12">
@@ -196,41 +201,30 @@ const publicacionesFiltradas = computed(() => {
 })
 
 // Cargar datos iniciales
-onMounted(async () => {
-  // Resetear busquedaActiva usando el método del store
-  if (publicacionesStore.resetearBusquedaActiva) {
-    publicacionesStore.resetearBusquedaActiva()
-  }
-  
-  // Llamar directamente a obtenerPublicaciones
-  try {
-    await publicacionesStore.obtenerPublicaciones({ 
-      estado: 'publicado', 
-      limit: 50
-    })
-  } catch (err) {
-    console.error('Error en JobsDashboard:', err)
-  }
-})
+await useAsyncData('publicaciones', () =>
+  publicacionesStore.obtenerPublicaciones({
+    estado: 'publicado',
+    limit: 50
+  })
+)
+
 
 // Manejador para nueva publicación
 const nuevaPublicacion = () => {
   console.log('📝 Redirigiendo a formulario de nueva publicación')
   
   // Redirigir a la página de creación de publicación
-  // Asegúrate de que la ruta sea correcta según tu estructura de carpetas
   navigateTo('/jobs/formJob')
-  
-  // Alternativas si necesitas diferentes rutas:
-  // navigateTo('/jobs/crear')
-  // navigateTo('/crear-publicacion')
-  // navigateTo('/publicaciones/nueva')
 }
 
 // Recargar publicaciones cuando se limpian filtros
-const recargarPublicaciones = () => {
-  publicacionesStore.limpiarFiltros()
+const recargarPublicaciones = async () => {
+  await publicacionesStore.obtenerPublicaciones({
+    estado: 'publicado',
+    limit: 50
+  })
 }
+
 
 // Limpiar búsqueda activa
 const limpiarBusqueda = async () => {
@@ -259,5 +253,29 @@ const handleSavePublicacion = (publicacion: Publicacion, saved: boolean) => {
   console.log('Guardando publicación:', publicacion.id, saved)
   // Aquí puedes guardar en localStorage o hacer petición a API
   // Por ejemplo: guardarEnFavoritos(publicacion.id, saved)
+}
+
+const aplicarBusqueda = async (payload: {
+  busqueda?: string
+  provincia_id?: string
+  municipio_id?: string
+  modo?: string
+  jornada?: string
+  experiencia_min?: number
+}) => {
+  // reset paginación
+  publicacionesStore.filtros.offset = 0
+
+  if (payload.busqueda) {
+    publicacionesStore.filtros.busqueda = payload.busqueda
+  } else {
+    publicacionesStore.filtros.busqueda = ''
+  }
+
+  await publicacionesStore.aplicarFiltrosConFiltros(payload)
+}
+
+const limpiarBusquedaCompleta = async () => {
+  await publicacionesStore.limpiarFiltros()
 }
 </script>

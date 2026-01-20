@@ -5,6 +5,7 @@
 
 <script setup>
 definePageMeta({
-  layout: 'jobs'
+  layout: 'jobs',
+  middleware: 'auth'
 })
 </script>
