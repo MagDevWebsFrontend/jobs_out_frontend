@@ -5,7 +5,7 @@
       <!-- COLUMNA IZQUIERDA: Info básica (ProfileHeader) -->
       <div class="lg:col-span-1">
         <div class="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-          <ProfileHeader :user="userData" />
+          <ProfileHeader :user="user" />
         </div>
       </div>
       
@@ -13,10 +13,10 @@
       <div class="lg:col-span-2">
         <div class="space-y-8">
           <!-- ProfileInfo SOLO con info detallada (sin datos básicos duplicados) -->
-          <ProfileInfo :user="userData" />
+          <ProfileInfo :user="user" />
           
           <!-- Configuraciones -->
-          <NotificationSettings :config="userData.configuracion" />
+          <NotificationSettings :config="user.configuracion" />
           <DangerZone />
         </div>
       </div>
@@ -29,39 +29,23 @@ import ProfileHeader from '~/components/profile/ProfileHeader.vue'
 import ProfileInfo from '~/components/profile/ProfileInfo.vue'
 import NotificationSettings from '~/components/profile/NotificationSettings.vue'
 import DangerZone from '~/components/profile/DangerZone.vue'
-
-// Datos de ejemplo
-const userData = ref({
-  id: "77777777-7777-7777-7777-777777777777",
-  nombre: "Juan",
-  apellidos: "Pérez",
-  username: "juanp",
-  email: "juan@example.com",
-  rol: "trabajador",
-  telefono_e164: "+584141234567",
-  municipio_id: "44444444-4444-4444-4444-444444444444",
-  avatar_url: null,
-  created_at: "2026-01-01T19:30:29.186Z",
-  updated_at: "2026-01-16T21:25:32.652Z",
-  configuracion: {
-    telegram_notif: false,
-    created_at: "2026-01-01T19:30:29.186Z",
-    updated_at: "2026-01-01T19:30:29.186Z"
-  },
-  municipio: {
-    id: "44444444-4444-4444-4444-444444444444",
-    provincia_id: "11111111-1111-1111-1111-111111111111",
-    nombre: "Municipio 2",
-    created_at: "2026-01-01T19:30:29.186Z",
-    provincia: {
-      id: "11111111-1111-1111-1111-111111111111",
-      nombre: "Provincia A",
-      created_at: "2026-01-01T19:30:29.186Z"
-    }
-  }
-})
+import { storeToRefs } from 'pinia'
+import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
-  layout: 'profile-layout'
+  layout: 'profile-layout',
+  middleware: 'auth'
 })
+
+const api = useApi()
+const auth = useAuthStore()
+const { user } = storeToRefs(auth)
+
+/**
+ * Si el usuario no está cargado aún → fetch
+ */
+if (!user.value) {
+  const res = await api('/api/auth/me')
+  auth.user = res.data
+}
 </script>

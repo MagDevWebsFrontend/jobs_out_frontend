@@ -16,7 +16,7 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     try {
       const url = `${runtime.public.apiBaseUrl}/api/auth/login`
-      const res = await $fetch(url, {
+      const res: any = await $fetch(url, {
         method: 'POST',
         body: { identifier, password },
       })
@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
     if (!refreshToken.value) throw new Error('No refresh token')
     try {
       const url = `${runtime.public.apiBaseUrl}/api/auth/refresh`
-      const res = await $fetch(url, {
+      const res:any = await $fetch(url, {
         method: 'POST',
         body: { refreshToken: refreshToken.value },
       })
@@ -60,6 +60,13 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+async function fetchMe() {
+  const api = useApi()
+  const res: any = await api('/api/users/me')
+  user.value = res.data
+}
+
+
   return {
     accessToken,
     refreshToken,
@@ -69,5 +76,6 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     logout,
     refresh,
+    fetchMe,
   }
 })

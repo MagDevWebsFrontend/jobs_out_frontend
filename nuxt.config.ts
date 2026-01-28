@@ -18,7 +18,8 @@ export default defineNuxtConfig({
        *
        * @default `['stores']`
        */
-    storesDirs: []
+    storesDirs: [],
+    
   },
   
   components: true,

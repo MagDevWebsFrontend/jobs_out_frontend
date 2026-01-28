@@ -23,8 +23,8 @@
     <!-- Componente de búsqueda -->
     <JobSearchSection
       :loading="loading"
-      :provincias="publicacionesStore.provincias"
-      :municipios="publicacionesStore.municipios"
+      :provincias="unref(publicacionesStore.provincias)"
+      :municipios="unref(publicacionesStore.municipios)"
       @buscar="aplicarBusqueda"
       @limpiar="limpiarBusquedaCompleta"
 />
@@ -169,7 +169,7 @@
 
 <script setup lang="ts">
 import { usePublicaciones } from '~/composables/usePublicaciones'
-import type { Publicacion } from '~/types/publicaciones'
+import type { Publicacion } from '#shared/types/publicaciones'
 import JobSearchSection from './JobSearchSection.vue'
 
 // Usar el composable
@@ -239,8 +239,7 @@ const cargarMas = async () => {
 // Manejadores de eventos
 const handleViewPublicacion = (publicacion: Publicacion) => {
   console.log('Viendo publicación:', publicacion.id)
-  // Aquí puedes navegar a la página de detalles
-  // navigateTo(`/jobs/${publicacion.id}`)
+  navigateTo(`/jobs/${publicacion.id}`)
 }
 
 const handleApplyPublicacion = (publicacion: Publicacion) => {
