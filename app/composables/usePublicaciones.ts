@@ -1,5 +1,5 @@
 // composables/usePublicaciones.ts
-import type { Publicacion, PublicacionesResponse } from '~/types/publicaciones'
+import type { Publicacion, PublicacionesResponse } from '#shared/types/publicaciones'
 
 interface FiltrosPublicaciones {
   estado?: string
@@ -100,7 +100,7 @@ export const usePublicaciones = () => {
     const provinciasMap = new Map<string, { id: string; nombre: string }>()
     const municipiosMap = new Map<string, { id: string; nombre: string; provincia_id: string }>()
     
-    publicaciones.value.forEach(pub => {
+    publicaciones.value.forEach((pub: { trabajo: { municipio: any } }) => {
       const municipio = pub.trabajo?.municipio
       const provincia = municipio?.provincia
       
@@ -208,7 +208,7 @@ export const usePublicaciones = () => {
       return publicaciones.value
     }
     
-    return publicaciones.value.filter(pub => 
+    return publicaciones.value.filter((pub: { trabajo: { experiencia_min: number } }) => 
       pub.trabajo?.experiencia_min >= experiencia
     )
   }
@@ -217,6 +217,7 @@ export const usePublicaciones = () => {
   const resetearBusquedaActiva = () => {
     busquedaActiva.value = false
   }
+
 
   return {
     // Estado

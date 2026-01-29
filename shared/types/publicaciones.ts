@@ -45,7 +45,7 @@ export interface Publicacion {
   estado: 'publicado' | 'oculto' | 'eliminado'
   created_at: string
   updated_at: string
-  imagen_url: string | null
+  imagen_url: string 
   trabajo: Trabajo
   autor: Autor
 }

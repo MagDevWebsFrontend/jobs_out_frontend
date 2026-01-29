@@ -171,9 +171,11 @@
 import { usePublicaciones } from '~/composables/usePublicaciones'
 import type { Publicacion } from '#shared/types/publicaciones'
 import JobSearchSection from './JobSearchSection.vue'
+import { useGuardadosStore } from '~/stores/guardados'
 
-// Usar el composable
+// Stores
 const publicacionesStore = usePublicaciones()
+const guardadosStore = useGuardadosStore()
 
 // Acceder directamente a los refs del store
 const { 
@@ -201,19 +203,20 @@ const publicacionesFiltradas = computed(() => {
 })
 
 // Cargar datos iniciales
-await useAsyncData('publicaciones', () =>
-  publicacionesStore.obtenerPublicaciones({
-    estado: 'publicado',
-    limit: 50
-  })
-)
-
+await useAsyncData('publicaciones', async () => {
+  await Promise.all([
+    publicacionesStore.obtenerPublicaciones({
+      estado: 'publicado',
+      limit: 50
+    }),
+    // Cargar las publicaciones guardadas del usuario
+    guardadosStore.obtenerGuardados()
+  ])
+})
 
 // Manejador para nueva publicación
 const nuevaPublicacion = () => {
   console.log('📝 Redirigiendo a formulario de nueva publicación')
-  
-  // Redirigir a la página de creación de publicación
   navigateTo('/jobs/formJob')
 }
 
@@ -224,7 +227,6 @@ const recargarPublicaciones = async () => {
     limit: 50
   })
 }
-
 
 // Limpiar búsqueda activa
 const limpiarBusqueda = async () => {
@@ -248,10 +250,32 @@ const handleApplyPublicacion = (publicacion: Publicacion) => {
   // Por ejemplo: showApplyModal.value = true; selectedJob.value = publicacion
 }
 
-const handleSavePublicacion = (publicacion: Publicacion, saved: boolean) => {
-  console.log('Guardando publicación:', publicacion.id, saved)
-  // Aquí puedes guardar en localStorage o hacer petición a API
-  // Por ejemplo: guardarEnFavoritos(publicacion.id, saved)
+// Manejador para guardar/desguardar publicación
+const handleSavePublicacion = async (publicacion: Publicacion) => {
+  try {
+    // Mostrar loading en el botón si es necesario
+    // Puedes pasar un estado loading al componente JobsList o usar un estado local
+    
+    const result = await guardadosStore.toggleGuardado(
+      publicacion.id, 
+      publicacion
+    )
+    
+    if (result === false) {
+      console.log('Publicación desguardada:', publicacion.id)
+      // Opcional: Mostrar notificación de éxito
+      // useToast().success('Publicación eliminada de guardados')
+    } else {
+      console.log('Publicación guardada:', publicacion.id)
+      // Opcional: Mostrar notificación de éxito
+      // useToast().success('Publicación guardada correctamente')
+    }
+    
+  } catch (error) {
+    console.error('Error al guardar/desguardar:', error)
+    // Mostrar error al usuario
+    // useToast().error('Error al procesar la acción')
+  }
 }
 
 const aplicarBusqueda = async (payload: {
@@ -277,4 +301,14 @@ const aplicarBusqueda = async (payload: {
 const limpiarBusquedaCompleta = async () => {
   await publicacionesStore.limpiarFiltros()
 }
+
+// Función para verificar si una publicación está guardada
+const estaGuardada = (publicacionId: string) => {
+  return guardadosStore.estaGuardada(publicacionId)
+}
+
+// También puedes exponer la función al template si la necesitas
+defineExpose({
+  estaGuardada
+})
 </script>

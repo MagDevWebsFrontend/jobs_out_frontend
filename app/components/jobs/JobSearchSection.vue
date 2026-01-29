@@ -237,7 +237,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Provincia, Municipio } from '~/types/publicaciones'
+import type { Provincia, Municipio } from '#shared/types/publicaciones'
 
 /* =========================
    PROPS

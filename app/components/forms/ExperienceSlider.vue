@@ -1,42 +1,31 @@
-<!-- components/forms/ExperienceSlider.vue - CORREGIDO -->
 <template>
-  <div class="space-y-4">
-    <div class="flex justify-between items-center">
-      <span class="text-lg font-semibold text-gray-800">
-        {{ experienceLabel }}
-      </span>
-      <span class="text-sm text-gray-500">
-        {{ experienceText }}
-      </span>
+  <div class="space-y-3">
+    <div class="flex items-center justify-between">
+      <div class="text-base font-medium text-slate-800">{{ experienceLabel }}</div>
+      <div class="text-sm text-slate-500">{{ experienceText }}</div>
     </div>
-    
-    <div class="px-2">
-      <input
-        v-model="modelValue"
-        type="range"
-        min="0"
-        max="10"
-        step="1"
-        class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-blue-600"
-      />
-      
-      <div class="flex justify-between text-xs text-gray-500 mt-2">
-        <span>0</span>
-        <span>2</span>
-        <span>4</span>
-        <span>6</span>
-        <span>8</span>
-        <span>10+</span>
-      </div>
+
+    <input
+      v-model="modelValue"
+      type="range"
+      min="0"
+      max="10"
+      step="1"
+      aria-label="Años de experiencia"
+      class="w-full h-2 bg-slate-200 rounded-lg appearance-none"
+    />
+
+    <div class="flex justify-between text-xs text-slate-400 mt-2">
+      <span>0</span><span>2</span><span>4</span><span>6</span><span>8</span><span>10+</span>
     </div>
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const modelValue = defineModel({ type: Number, default: 0 })
 
 const experienceLabel = computed(() => {
-  const labels = {
+  const labels: Record<number, string> = {
     0: 'Sin experiencia',
     1: '1 año',
     2: '2 años',

@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Publicacion } from '~/types/publicaciones'
+import type { Publicacion } from '#shared/types/publicaciones'
 import JobsCard from './JobsCard.vue';
 
 defineProps<{

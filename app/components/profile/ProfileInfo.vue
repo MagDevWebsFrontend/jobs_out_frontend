@@ -58,15 +58,6 @@
         </h3>
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- ID de usuario -->
-          <div>
-            <label class="block text-sm font-medium text-gray-500 mb-1">
-              ID de Usuario
-            </label>
-            <p class="text-gray-900 font-mono text-sm">
-              {{ user.id }}
-            </p>
-          </div>
           
           <!-- Rol -->
           <div>
@@ -114,8 +105,7 @@ const props = defineProps({
 const getRoleLabel = (role) => {
   const roles = {
     admin: 'Administrador',
-    trabajador: 'Trabajador',
-    empleador: 'Empleador'
+    trabajador: 'Trabajador'
   }
   return roles[role] || role
 }

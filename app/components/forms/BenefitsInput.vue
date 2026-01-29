@@ -1,62 +1,63 @@
-<!-- components/forms/BenefitsInput.vue - CORREGIDO -->
 <template>
   <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">
-      Beneficios Ofrecidos
+    <label class="block text-sm font-medium text-slate-700 mb-2">
+      Beneficios
     </label>
-    
-    <div class="space-y-3">
-      <!-- Input para agregar nuevo beneficio -->
-      <div class="flex gap-2">
-        <input
-          v-model="newBenefit"
-          type="text"
-          placeholder="Ej: Seguro médico, Bonos, etc."
-          class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-          @keyup.enter="addBenefit"
-        />
+
+    <div class="flex gap-2">
+      <input
+        v-model="newBenefit"
+        type="text"
+        placeholder="Ej: Seguro médico, Bonos, Teletrabajo"
+        @keyup.enter="addBenefit"
+        class="flex-1 px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500"
+      />
+
+      <button
+        type="button"
+        @click="addBenefit"
+        class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+      >
+        Agregar
+      </button>
+    </div>
+
+    <div class="flex flex-wrap gap-2 mt-3">
+      <span
+        v-for="(b, i) in benefits"
+        :key="i"
+        class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full"
+      >
+        <span class="text-sm">{{ b }}</span>
         <button
           type="button"
-          @click="addBenefit"
-          class="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+          @click="removeBenefit(i)"
+          class="text-blue-500 hover:text-blue-700"
+          :aria-label="`Eliminar ${b}`"
         >
-          Agregar
+          ×
         </button>
-      </div>
-      
-      <!-- Lista de beneficios - CORREGIDO -->
-      <div v-if="benefits.length > 0" class="flex flex-wrap gap-2 mt-3">
-        <div
-          v-for="(benefit, index) in benefits"
-          :key="index"
-          class="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg"
-        >
-          <span>{{ benefit }}</span>
-          <button
-            type="button"
-            @click="removeBenefit(index)"
-            class="text-blue-500 hover:text-blue-700"
-          >
-            ×
-          </button>
-        </div>
-      </div>
+      </span>
     </div>
   </div>
 </template>
 
-<script setup>
-const benefits = defineModel({ type: Array, default: () => [] })
+<script setup lang="ts">
+const benefits = defineModel<string[]>({
+  default: () => []
+})
+
 const newBenefit = ref('')
 
 const addBenefit = () => {
-  if (newBenefit.value.trim()) {
-    benefits.value.push(newBenefit.value.trim())
-    newBenefit.value = ''
-  }
+  const value = newBenefit.value.trim()
+  if (!value) return
+
+  benefits.value.push(value)
+  newBenefit.value = ''
 }
 
-const removeBenefit = (index) => {
+const removeBenefit = (index: number) => {
   benefits.value.splice(index, 1)
 }
 </script>

@@ -1,3 +1,4 @@
+//composables/useApi.ts
 import { useAuthStore } from "~/stores/auth"
 
 export function useApi() {

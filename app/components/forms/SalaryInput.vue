@@ -1,33 +1,20 @@
-<!-- components/forms/SalaryInput.vue -->
 <template>
   <div class="space-y-4">
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Salario Mínimo
-      </label>
+      <label class="block text-sm font-medium text-slate-700 mb-2">Salario mínimo</label>
       <div class="relative">
-        <input
-          v-model="min"
-          type="number"
-          min="0"
-          class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-        />
-        <span class="absolute left-4 top-3 text-gray-500">CUP</span>
+        <span class="absolute left-3 top-3 text-slate-500 text-sm">CUP</span>
+        <input v-model="min" type="number" min="0" step="50" inputmode="numeric"
+               class="w-full pl-14 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
       </div>
     </div>
-    
+
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        Salario Máximo
-      </label>
+      <label class="block text-sm font-medium text-slate-700 mb-2">Salario máximo</label>
       <div class="relative">
-        <input
-          v-model="max"
-          type="number"
-          min="0"
-          class="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-        />
-        <span class="absolute left-4 top-3 text-gray-500">CUP</span>
+        <span class="absolute left-3 top-3 text-slate-500 text-sm">CUP</span>
+        <input v-model="max" type="number" min="0" step="50" inputmode="numeric"
+               class="w-full pl-14 pr-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500" />
       </div>
     </div>
   </div>

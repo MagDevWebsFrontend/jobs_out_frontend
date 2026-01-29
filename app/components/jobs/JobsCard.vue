@@ -5,8 +5,7 @@
     <div class="h-48 bg-gray-200 relative">
       <img 
         v-if="publicacion.imagen_url"
-        :src="`${apiBaseUrl}/${publicacion.imagen_url}`" 
-        :alt="publicacion.trabajo.titulo"
+        :src="publicacion.imagen_url"
         class="w-full h-full object-cover"
       />
       <div v-else class="w-full h-full flex items-center justify-center bg-gradient-to-r from-blue-100 to-indigo-100">
@@ -143,7 +142,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Publicacion } from '~/types/publicaciones'
+import type { Publicacion } from '#shared/types/publicaciones'
 
 interface Props {
   publicacion: Publicacion
@@ -155,9 +154,6 @@ const emit = defineEmits<{
   apply: [publicacion: Publicacion]
   save: [publicacion: Publicacion, saved: boolean]
 }>()
-
-const config = useRuntimeConfig()
-const apiBaseUrl = config.public.apiBaseUrl
 
 const isSaved = ref(false)
 
@@ -209,6 +205,7 @@ const formatModo = (modo: string) => {
   }
   return map[modo] || modo
 }
+
 </script>
 
 <style scoped>
