@@ -1,3 +1,4 @@
+//stores/publicacion
 import { defineStore } from 'pinia'
 import type { Publicacion } from '#shared/types/publicaciones'
 

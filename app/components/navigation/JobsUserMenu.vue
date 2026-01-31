@@ -1,6 +1,6 @@
-<!-- components/navigation/JobsUserMenu.vue -->
 <template>
   <div ref="menuRef" class="relative">
+    <!-- Botón del menú -->
     <button
       @click="toggleUserMenu"
       class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
@@ -9,16 +9,19 @@
       :aria-controls="dropdownId"
       type="button"
     >
+      <!-- Iniciales del usuario -->
       <div
         class="h-8 w-8 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center text-white font-semibold"
       >
         {{ userInitials }}
       </div>
 
+      <!-- Nombre del usuario -->
       <span class="ml-2 hidden md:block text-gray-700 font-medium">
         {{ userName }}
       </span>
 
+      <!-- Icono flecha -->
       <svg
         class="ml-1 h-5 w-5 text-gray-400 transition-transform duration-200"
         :class="{ 'rotate-180': isUserMenuOpen }"
@@ -35,7 +38,7 @@
       </svg>
     </button>
 
-    <!-- Menú -->
+    <!-- Dropdown -->
     <div
       v-if="isUserMenuOpen"
       :id="dropdownId"
@@ -44,7 +47,7 @@
       aria-orientation="vertical"
       :aria-labelledby="buttonId"
     >
-      <!-- Usuario -->
+      <!-- Info de usuario -->
       <div class="px-4 py-3 border-b border-gray-100">
         <p class="text-sm font-medium text-gray-900 truncate">
           {{ auth.user?.name || auth.user?.username || 'Usuario' }}
@@ -52,17 +55,9 @@
         <p class="text-xs text-gray-500 truncate">
           {{ auth.user?.email || 'usuario@ejemplo.com' }}
         </p>
-        
-        <div v-if="isAdmin" class="mt-1">
-          <span
-            class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
-          >
-            Administrador
-          </span>
-        </div>
       </div>
 
-      <!-- Links -->
+      <!-- Links del menú -->
       <div class="py-1">
         <NuxtLink to="/profile" class="menu-item" @click="closeUserMenu">
           Mi Perfil
@@ -76,16 +71,15 @@
           Guardados
         </NuxtLink>
 
-        <!-- Admin -->
-        <div v-if="isAdmin" class="border-t border-gray-100 mt-1 pt-1">
-          <NuxtLink to="/admin/users" class="menu-item" @click="closeUserMenu">
-            Gestionar Usuarios
-          </NuxtLink>
-
-          <NuxtLink to="/admin/logs" class="menu-item" @click="closeUserMenu">
-            Ver Trazas del Sistema
-          </NuxtLink>
-        </div>
+        <!-- Único link de Admin -->
+        <NuxtLink
+          v-if="isAdmin"
+          to="/admin"
+          class="menu-item font-semibold text-blue-700"
+          @click="closeUserMenu"
+        >
+          Admin
+        </NuxtLink>
       </div>
 
       <!-- Logout -->
@@ -104,8 +98,8 @@
 </template>
 
 <script setup lang="ts">
-  
 import { useAuthStore } from '~/stores/auth'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const auth = useAuthStore()
 
@@ -116,16 +110,15 @@ const uid = Math.random().toString(36).slice(2)
 const buttonId = `user-menu-button-${uid}`
 const dropdownId = `user-dropdown-${uid}`
 
+// Computed para admin
 const isAdmin = computed(() =>
-  auth.user?.role === 'admin' ||
+  auth.user?.rol === 'admin' ||
   auth.user?.permissions?.includes('admin') ||
   auth.user?.isAdmin === true
 )
 
-const userName = computed(() =>
-  auth.user?.name || auth.user?.username
-)
-
+// Computed nombre e iniciales
+const userName = computed(() => auth.user?.name || auth.user?.username)
 const userInitials = computed(() => {
   const name = auth.user?.name
   if (!name) return 'U'
@@ -135,43 +128,34 @@ const userInitials = computed(() => {
     : parts[0].slice(0, 2).toUpperCase()
 })
 
-const toggleUserMenu = () => {
-  isUserMenuOpen.value = !isUserMenuOpen.value
-}
+// Toggle menu
+const toggleUserMenu = () => { isUserMenuOpen.value = !isUserMenuOpen.value }
+const closeUserMenu = () => { isUserMenuOpen.value = false }
 
-const closeUserMenu = () => {
-  isUserMenuOpen.value = false
-}
-
+// Logout
 const handleLogout = async () => {
   closeUserMenu()
-  try {
-    await auth.logout()
-  } catch (e) {
-    console.error('Error al cerrar sesión', e)
-  }
+  try { await auth.logout() }
+  catch (e) { console.error('Error al cerrar sesión', e) }
 }
 
+// Click outside & escape
 const onClickOutside = (e: MouseEvent) => {
   if (!menuRef.value) return
-  if (!menuRef.value.contains(e.target as Node)) {
-    closeUserMenu()
-  }
+  if (!menuRef.value.contains(e.target as Node)) closeUserMenu()
 }
-
-const onKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape') closeUserMenu()
-}
+const onKeydown = (e: KeyboardEvent) => { if (e.key === 'Escape') closeUserMenu() }
 
 onMounted(() => {
   document.addEventListener('click', onClickOutside)
   document.addEventListener('keydown', onKeydown)
 })
-
 onUnmounted(() => {
   document.removeEventListener('click', onClickOutside)
   document.removeEventListener('keydown', onKeydown)
 })
+
+console.log('auth.user:', auth.user?.rol)
 </script>
 
 <style scoped>
@@ -180,14 +164,8 @@ onUnmounted(() => {
 }
 
 @keyframes slideInFromTop {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-in {

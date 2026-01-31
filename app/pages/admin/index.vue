@@ -1,47 +1,49 @@
 <template>
-  <main class="max-w-5xl mx-auto px-4 py-8">
-    <header class="mb-8">
-      <h1 class="text-2xl font-bold text-[#0A66C2]">
-        Panel de administración
+  <section class="p-4 sm:p-6">
+    <header class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-900">
+        Panel de Administración
       </h1>
-      <p class="text-sm text-[#5E5E5E]">
-        Gestión del sistema y supervisión general
+      <p class="text-gray-600">
+        Visión general del sistema
       </p>
     </header>
 
-    <section class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <!-- Usuarios -->
-      <NuxtLink
-        to="/admin/users"
-        class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow transition"
-      >
-        <h2 class="font-semibold text-gray-900 mb-1">
-          Gestión de usuarios
-        </h2>
-        <p class="text-sm text-[#5E5E5E]">
-          Ver, bloquear o administrar usuarios del sistema
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="bg-white shadow rounded-xl p-6 text-center">
+        <p class="text-gray-500 text-sm">Usuarios registrados</p>
+        <p class="text-3xl font-bold text-gray-900">
+          {{ stats.usuarios }}
         </p>
-      </NuxtLink>
+      </div>
 
-      <!-- Logs -->
-      <NuxtLink
-        to="/admin/logs"
-        class="bg-white rounded-xl border border-gray-100 p-6 shadow-sm hover:shadow transition"
-      >
-        <h2 class="font-semibold text-gray-900 mb-1">
-          Trazas del sistema
-        </h2>
-        <p class="text-sm text-[#5E5E5E]">
-          Auditoría y registros de actividad
+      <div class="bg-white shadow rounded-xl p-6 text-center">
+        <p class="text-gray-500 text-sm">Publicaciones activas</p>
+        <p class="text-3xl font-bold text-gray-900">
+          {{ stats.publicaciones }}
         </p>
-      </NuxtLink>
-    </section>
-  </main>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script setup lang="ts">
 definePageMeta({
+  layout: 'admin',
   middleware: ['auth', 'admin'],
-  title: 'Panel de administración'
+  title: 'Panel de Administración',
+  meta: [
+    {
+      name: 'description',
+      content: 'Dashboard de administración y métricas del sistema'
+    }
+  ]
 })
+
+import { onMounted } from 'vue'
+import { useAdminStats } from '~/composables/useAdminStats'
+
+const { stats, fetchStats } = useAdminStats()
+
+onMounted(fetchStats)
 </script>

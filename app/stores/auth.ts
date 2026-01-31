@@ -62,7 +62,7 @@ export const useAuthStore = defineStore('auth', () => {
 
 async function fetchMe() {
   const api = useApi()
-  const res: any = await api('/api/users/me')
+  const res: any = await api('/api/auth/me')
   user.value = res.data
 }
 
