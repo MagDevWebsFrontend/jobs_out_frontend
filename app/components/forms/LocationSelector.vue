@@ -1,3 +1,4 @@
+<!--components/form/LocationSelector-->
 <template>
   <div class="space-y-6">
     <div>
@@ -46,8 +47,13 @@
 import { useApi } from '~/composables/useApi'
 
 const props = defineProps({
-  modelValue: { type: String, default: '' }
+  modelValue: { type: String, default: '' },
+  errors: {
+    type: Object,
+    default: () => ({})
+  }
 })
+
 const emit = defineEmits(['update:modelValue'])
 
 const api = useApi()

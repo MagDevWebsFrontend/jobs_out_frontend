@@ -16,27 +16,40 @@
             v-model:form="formData"
             :jornada-options="jornadaOptions"
             :modo-options="modoOptions"
+            :errors="errors"
           />
 
           <div class="grid gap-6 sm:grid-cols-2">
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">Experiencia requerida</label>
-              <ExperienceSlider v-model="formData.experiencia_min" />
+              <ExperienceSlider 
+              v-model="formData.experiencia_min"
+              :errors="errors" />
             </div>
 
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">Rango salarial (CUP)</label>
-              <SalaryInput v-model:min="formData.salario_min" v-model:max="formData.salario_max" />
+              <SalaryInput 
+              v-model:min="formData.salario_min" 
+              v-model:max="formData.salario_max"
+              :errors="errors" />
             </div>
           </div>
 
-          <BenefitsInput v-model="formData.beneficios" />
+          <BenefitsInput 
+          v-model="formData.beneficios"
+          :errors="errors" />
 
           <div class="grid gap-6 sm:grid-cols-2">
-            <ContactForm v-model:telefono="contact.telefono" v-model:email="contact.email" />
+            <ContactForm 
+            v-model:telefono="contact.telefono" 
+            v-model:email="contact.email"
+            :errors="errors" />
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-2">Imagen destacada</label>
-              <ImageUpload v-model="imageFile" />
+              <ImageUpload 
+                v-model="imageFile"
+                :errors="errors" />
               <p class="text-xs text-slate-400 mt-2">Formato JPG/PNG. Máx recommended 2MB.</p>
             </div>
           </div>
@@ -87,6 +100,8 @@ import { useApi } from '~/composables/useApi'
 import { useRouter } from '#imports'
 import Toast from '~/components/ui/Toast.vue'
 import { useToast } from '~/composables/useToast'
+import { useFormValidation } from '~/composables/errors/useFormValidation'
+
 
 
 useHead({
@@ -134,6 +149,13 @@ const modoOptions = ref([
   { value: 'hibrido', label: 'Híbrido' }
 ])
 
+
+const {
+  errors,
+  validateForm,
+  clearErrors
+} = useFormValidation(formData, contact, imageFile)
+
 onMounted(async () => {
   try {
     const res: any = await api('/api/trabajos/options')
@@ -171,6 +193,10 @@ const showSuccess = (msg: string) => {
 }
 
 const saveDraft = async () => {
+  if (!validateForm('borrador')) {
+    toast.show('Revisa los campos marcados', 'error')
+    return
+  }
   try {
     const result = await crearPublicacionCompleta({
       trabajo: formData.value,
@@ -193,6 +219,10 @@ const saveDraft = async () => {
 }
 
 const publish = async () => {
+  if (!validateForm('publicado')) {
+    toast.show('Corrige los errores antes de publicar', 'error')
+    return
+  }
   try {
     const result = await crearPublicacionCompleta({
       trabajo: formData.value,

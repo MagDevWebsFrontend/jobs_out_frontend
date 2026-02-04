@@ -21,8 +21,8 @@ import { ref, onMounted } from 'vue'
 import type { User } from '#shared/types/user'
 import { useUsersStore } from '~/stores/admin/users'
 
-import UsersTable from '~/components/admin/UsersTable.vue'
-import UserDetailModal from '~/components/admin/UserDetailModal.vue'
+import UsersTable from '~/components/admin/users/UsersTable.vue'
+import UserDetailModal from '~/components/admin/users/UserDetailModal.vue'
 
 definePageMeta({
   layout: 'admin',

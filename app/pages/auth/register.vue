@@ -1,3 +1,4 @@
+<!--pages/auth/register.vue-->
 <template>
   <AuthRegisterForm />
 </template>

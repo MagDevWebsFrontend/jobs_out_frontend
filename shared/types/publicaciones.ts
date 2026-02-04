@@ -1,18 +1,6 @@
+import type { MunicipioEntity } from "./structures"
+
 // types/publicaciones.ts
-export interface Provincia {
-  id: string
-  nombre: string
-  created_at: string
-}
-
-export interface Municipio {
-  id: string
-  provincia_id: string
-  nombre: string
-  created_at: string
-  provincia: Provincia
-}
-
 export interface Autor {
   id: string
   nombre: string
@@ -34,7 +22,7 @@ export interface Trabajo {
   created_at: string
   updated_at: string
   deleted_at: string | null
-  municipio: Municipio
+  municipio: MunicipioEntity
 }
 
 export interface Publicacion {

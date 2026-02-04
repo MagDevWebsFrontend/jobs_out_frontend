@@ -1,30 +1,7 @@
 <!-- components/profile/NotificationSettings.vue -->
 <template>
   <div class="bg-white rounded-xl shadow-lg p-6">
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h2 class="text-xl font-bold text-gray-900">
-          Configuración de Notificaciones
-        </h2>
-        <p class="text-gray-600 mt-1">
-          Controla cómo y cuándo recibes notificaciones
-        </p>
-      </div>
-      
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          @click="saveSettings"
-          :disabled="loading"
-          class="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {{ loading ? 'Guardando...' : 'Guardar cambios' }}
-        </button>
-      </div>
-    </div>
-    
     <div class="space-y-6">
-      <!-- Configuración de notificaciones -->
       <div class="space-y-4">
         <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
           <div>
@@ -33,72 +10,132 @@
               Recibe notificaciones importantes en tu cuenta de Telegram
             </p>
           </div>
-          
+
           <label class="relative inline-flex items-center cursor-pointer">
             <input
               type="checkbox"
               v-model="settings.telegram_notif"
               class="sr-only peer"
             />
-            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div
+              class="w-11 h-6 bg-gray-200 rounded-full
+                    peer-focus:ring-2 peer-focus:ring-blue-300
+                    peer-checked:bg-blue-600
+                    transition-colors duration-200 relative"
+            >
+              <span
+                class="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow
+                      transform transition-transform duration-200
+                      peer-checked:translate-x-5"
+              ></span>
+            </div>
           </label>
+
         </div>
       </div>
-      
-      <!-- Información adicional -->
+
+      <!-- Información adicional (igual) -->
       <div class="p-4 bg-blue-50 rounded-lg border border-blue-200">
-        <div class="flex items-start gap-3">
-          <div class="flex-shrink-0">
-            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <div>
-            <h4 class="font-medium text-blue-900">Información sobre notificaciones</h4>
-            <p class="text-sm text-blue-700 mt-1">
-              Las notificaciones incluyen: nuevos mensajes, actualizaciones de trabajos, recordatorios importantes y alertas del sistema.
-            </p>
-          </div>
-        </div>
+        Al activar esta opcion permites que te enviemos:
+        - recordatorios siempre a las 8 am via telegram asi como notificaciones personalizadas de nuestros administradores. Gracias
+      </div>
+
+      <div class="flex justify-end">
+        <button
+          type="button"
+          @click="saveSettings"
+          :disabled="loading"
+          class="px-4 py-2 bg-blue-600 text-white rounded-lg"
+        >
+          {{ loading ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
       </div>
     </div>
+
+    <!-- Modal de verificación -->
+    <VerificationModal
+      :visible="showCodeModal"
+      :code="verificationCode"
+      :botLink="botLink"
+      @close="showCodeModal = false"
+    />
   </div>
 </template>
 
 <script setup>
+import { ref, watch, computed } from 'vue';
+import VerificationModal from '~/components/profile/VerificationModal.vue';
+import { useNotifications } from '~/composables/useNotifications'; // si lo guardas como composable export default export
+import { useAuthStore } from '~/stores/auth';
+
 const props = defineProps({
   config: {
     type: Object,
     default: () => ({})
   }
-})
+});
 
-const emit = defineEmits(['update:config'])
+const emit = defineEmits(['update:config']);
 
-const loading = ref(false)
+const auth = useAuthStore();
+const userId = computed(() => auth.user?.id);
+
+// local state
+const loading = ref(false);
 const settings = ref({
   telegram_notif: props.config.telegram_notif || false
-})
+});
+const showCodeModal = ref(false);
+const verificationCode = ref('');
+const botLink = ref('');
 
-// Watcher para sincronizar cambios
-watch(settings, (newSettings) => {
-  emit('update:config', newSettings)
-}, { deep: true })
+// composable
+const api = useApi(); // tu helper
+const { updateNotificationConfig, requestTelegramCode, state } = useNotifications(api);
 
-const saveSettings = async () => {
-  loading.value = true
-  console.log('Guardando configuración...', settings.value)
-  
-  // TODO: Reemplazar con llamada a la API
-  // await $fetch('/api/user/notifications', {
-  //   method: 'PUT',
-  //   body: settings.value
-  // })
-  
-  await new Promise(resolve => setTimeout(resolve, 800))
-  loading.value = false
-  
-  // Podrías agregar un toast/notificación de éxito aquí
-  console.log('Configuración guardada')
+// watcher para emitir cambios si necesitas
+watch(settings, (newVal) => {
+  emit('update:config', newVal);
+}, { deep: true });
+
+// Guarda configuración y si activó telegram pide el código
+async function saveSettings() {
+  if (!userId.value) {
+    // fallback: pedir recarga o login
+    return;
+  }
+
+  loading.value = true;
+
+  try {
+    // 1) Actualizar configuración en backend
+    await updateNotificationConfig(userId.value, {
+      telegram_notif: settings.value.telegram_notif
+    });
+
+    // 2) Si activó telegram y aún no tiene chat_id → solicitar código
+    if (settings.value.telegram_notif) {
+      // Llamada al endpoint para generar código
+      const data = await requestTelegramCode(userId.value); // { code, bot_link }
+
+      // Mostrar modal con el código
+      verificationCode.value = data.code;
+      botLink.value = data.bot_link || `https://t.me/${process.env.TELEGRAM_BOT_USERNAME?.replace('@','') || 'YourBot'}`;
+      showCodeModal.value = true;
+    } else {
+      // Si desactivó, puedes notificarlo
+    }
+
+    // Actualiza usuario en store para reflejar cambios (opcional)
+    // Puedes re-fetch user profile: await api('/api/auth/me')
+    const updated = await api('/api/auth/me'); // opcional
+    auth.user = updated.data;
+
+  } catch (err) {
+    console.error('Error guardando notificaciones', err);
+    // muestra toast
+  } finally {
+    loading.value = false;
+  }
 }
 </script>

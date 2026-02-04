@@ -1,11 +1,11 @@
-export interface Provincia {
+export interface ProvinciaEntity {
   id: string
   nombre: string
 }
 
-export interface Municipio {
+export interface MunicipioEntity {
   id: string
   nombre: string
   provincia_id: string
-  provincia?: Provincia
+  provincia?: ProvinciaEntity
 }

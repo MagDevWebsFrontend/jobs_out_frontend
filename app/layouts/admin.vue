@@ -6,6 +6,17 @@
         <h1 class="text-lg font-bold text-blue-600">Admin Panel</h1>
       </div>
 
+      <!-- BOTÓN VOLVER A JOBS -->
+      <div class="px-4 py-3 border-b border-gray-100">
+        <NuxtLink
+          to="/jobs"
+          class="flex items-center justify-center gap-2 w-full px-4 py-2 rounded-md
+                 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium"
+        >
+          ← Volver a Jobs
+        </NuxtLink>
+      </div>
+
       <nav class="flex-1 px-2 py-4 space-y-2 overflow-y-auto">
         <NuxtLink
           to="/admin"
@@ -32,11 +43,19 @@
         </NuxtLink>
 
         <NuxtLink
-          to="/admin/structures/"
+          to="/structures/provincias"
           class="block px-4 py-2 rounded hover:bg-blue-50 font-medium text-gray-700"
           active-class="bg-blue-100 text-blue-700"
         >
           Estructuras
+        </NuxtLink>
+
+        <NuxtLink
+          to="/admin/comunicado"
+          class="block px-4 py-2 rounded hover:bg-blue-50 font-medium text-gray-700"
+          active-class="bg-blue-100 text-blue-700"
+        >
+          Comunicado
         </NuxtLink>
       </nav>
     </aside>
@@ -49,6 +68,4 @@
 </template>
 
 <script setup lang="ts">
-// Aquí podemos agregar lógica común del layout en el futuro
 </script>
-
