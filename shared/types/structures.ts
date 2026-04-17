@@ -1,3 +1,4 @@
+//shared/types/structures.ts
 export interface ProvinciaEntity {
   id: string
   nombre: string

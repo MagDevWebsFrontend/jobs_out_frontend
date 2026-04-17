@@ -6,12 +6,20 @@ export const useCrearPublicacion = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
+  /* =========================
+     CREAR TRABAJO
+  ========================= */
   const crearTrabajo = async (data: any) => {
     try {
       const res: any = await api('/api/trabajos', {
         method: 'POST',
         body: data
       })
+
+      if (!res?.data?.id) {
+        throw new Error('No se recibió ID del trabajo')
+      }
+
       return res.data.id
     } catch (e: any) {
       console.error('crearTrabajo error', e)
@@ -19,12 +27,19 @@ export const useCrearPublicacion = () => {
     }
   }
 
-  const crearContacto = async (trabajoId: string, contacto: { tipo: string; valor: string }) => {
+  /* =========================
+     CREAR CONTACTO
+  ========================= */
+  const crearContacto = async (
+    trabajoId: string,
+    contacto: { tipo: string; valor: string }
+  ) => {
     try {
       const res: any = await api(`/api/trabajos/${trabajoId}/contactos`, {
         method: 'POST',
         body: contacto
       })
+
       return res.data
     } catch (e: any) {
       console.error('crearContacto error', e)
@@ -32,35 +47,45 @@ export const useCrearPublicacion = () => {
     }
   }
 
+  /* =========================
+     SUBIR IMAGEN (FIX CLAVE)
+  ========================= */
   const subirImagen = async (trabajoId: string, file: File) => {
     try {
       const form = new FormData()
       form.append('imagen', file)
 
-      const res: any = await api(`/api/publicaciones/${trabajoId}/imagen`, {
+      // 🔥 RUTA CORRECTA
+      const res: any = await api(`/api/uploads/${trabajoId}/imagen`, {
         method: 'POST',
         body: form
-        // NO establecer headers Content-Type: multipart/form-data (fetch lo hace)
       })
 
-      // Normalizar url (si backend devuelve url relativo)
-      return res.data?.url || null
+      if (!res?.data?.url) {
+        throw new Error('No se recibió URL de imagen')
+      }
+
+      return res.data.url
     } catch (e: any) {
       console.error('subirImagen error', e)
       throw new Error(e?.data?.message || 'Error al subir imagen')
     }
   }
 
+  /* =========================
+     CREAR PUBLICACION
+  ========================= */
   const crearPublicacion = async (data: {
     trabajo_id: string
     estado: string
     imagen_url?: string | null
   }) => {
     try {
-      const res = await api('/api/publicaciones', {
+      const res: any = await api('/api/publicaciones', {
         method: 'POST',
         body: data
       })
+
       return res.data
     } catch (e: any) {
       console.error('crearPublicacion error', e)
@@ -68,6 +93,9 @@ export const useCrearPublicacion = () => {
     }
   }
 
+  /* =========================
+     FLUJO COMPLETO
+  ========================= */
   const crearPublicacionCompleta = async ({
     trabajo,
     contactos,
@@ -83,35 +111,40 @@ export const useCrearPublicacion = () => {
     error.value = null
 
     try {
-      // 1) Crear trabajo SIN contactos para garantizar id
+      // 1️⃣ Crear trabajo
       const trabajoId = await crearTrabajo({
         ...trabajo,
-        estado // dejar que backend guarde estado
+        estado
       })
 
-      // 2) Crear contactos (si vienen)
-      if (Array.isArray(contactos) && contactos.length > 0) {
+      // 2️⃣ Crear contactos
+      if (Array.isArray(contactos)) {
         for (const c of contactos) {
-          // Omitir contactos vacíos
           if (!c?.valor) continue
           await crearContacto(trabajoId, c)
         }
       }
 
-      // 3) Subir imagen (opcional)
+      // 3️⃣ Subir imagen
       let imagenUrl: string | null = null
+
       if (imagen instanceof File) {
         imagenUrl = await subirImagen(trabajoId, imagen)
       }
 
-      // 4) Crear la publicación asociada
+      // 4️⃣ Crear publicación
       const publicacion = await crearPublicacion({
         trabajo_id: trabajoId,
         estado,
         imagen_url: imagenUrl
       })
 
-      return { trabajoId, publicacion }
+      return {
+        trabajoId,
+        publicacion,
+        imagenUrl
+      }
+
     } catch (e: any) {
       error.value = e.message || 'Error en el flujo de publicación'
       throw e

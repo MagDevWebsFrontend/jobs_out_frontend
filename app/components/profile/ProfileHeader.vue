@@ -4,12 +4,26 @@
     <!-- Avatar -->
     <div class="relative inline-block mb-4">
       <div class="w-32 h-32 rounded-full overflow-hidden bg-gray-200 border-4 border-white shadow-lg">
-        <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
-          <span class="text-4xl font-bold text-white">
-            {{ userInitials }}
-          </span>
-        </div>
-      </div>
+
+  <!-- ✅ SI TIENE AVATAR -->
+  <img
+    v-if="avatarUrl"
+    :src="avatarUrl"
+    @error="onImageError"
+    class="w-full h-full object-cover"
+  />
+
+  <!-- ❌ SI NO TIENE AVATAR -->
+  <div
+    v-else
+    class="w-full h-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600"
+  >
+    <span class="text-4xl font-bold text-white">
+      {{ userInitials }}
+    </span>
+  </div>
+
+</div>
       
       <!-- Badge de rol -->
       <div class="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
@@ -65,6 +79,11 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useImageUrl } from '~/composables/useImageUrl'
+
+const { getImageUrl } = useImageUrl()
+
+const avatarUrl = computed(() => getImageUrl(props.user?.avatar_url))
 
 const props = defineProps({
   user: {
@@ -78,6 +97,10 @@ const userInitials = computed(() => {
   const last = props.user?.apellidos?.charAt(0) || ''
   return first + last
 })
+
+const onImageError = (e) => {
+  e.target.style.display = 'none'
+}
 
 const userName = computed(() => {
   const name = props.user?.nombre || ''

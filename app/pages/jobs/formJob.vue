@@ -158,7 +158,7 @@ const {
 
 onMounted(async () => {
   try {
-    const res: any = await api('/api/trabajos/options')
+    const res: any = await api('/api/trabajos')
     if (res?.success && res.data) {
       if (Array.isArray(res.data.jornadas)) jornadaOptions.value = res.data.jornadas.map((j: string) => ({ value: j, label: j }))
       if (Array.isArray(res.data.modos)) modoOptions.value = res.data.modos.map((m: string) => ({ value: m, label: m }))

@@ -10,28 +10,54 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<Record<string, any> | null>(null)
   const loading = ref(false)
 
-  const isAuthenticated = computed(() => !!accessToken.value)
+  const isAuthenticated = computed(() => !!accessToken.value && !!user.value)
 
   async function login(identifier: string, password: string) {
-    loading.value = true
-    try {
-      const url = `${runtime.public.apiBaseUrl}/api/auth/login`
-      const res: any = await $fetch(url, {
-        method: 'POST',
-        body: { identifier, password },
-      })
-      // Según el ejemplo que diste el backend devuelve data.{user, token, refreshToken}
-      accessToken.value = res.data.token
-      refreshToken.value = res.data.refreshToken
-      user.value = res.data.user
-      return { success: true }
-    } catch (err) {
-      // Normaliza errores según tu backend
-      return { success: false, error: err }
-    } finally {
-      loading.value = false
-    }
+  loading.value = true
+  try {
+    const url = `${runtime.public.apiBaseUrl}/api/auth/login`
+    const res: any = await $fetch(url, {
+      method: 'POST',
+      body: { identifier, password },
+    })
+
+    setSession(res.data)
+
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err }
+  } finally {
+    loading.value = false
   }
+}
+
+async function register(payload: {
+  nombre: string
+  username: string
+  email?: string
+  password: string
+  telefono_e164?: string
+  municipio_id?: string
+}) {
+  loading.value = true
+  try {
+    const url = `${runtime.public.apiBaseUrl}/api/auth/register`
+
+    const res: any = await $fetch(url, {
+      method: 'POST',
+      body: payload,
+    })
+
+    // AUTO LOGIN
+    setSession(res.data)
+
+    return { success: true }
+  } catch (err) {
+    return { success: false, error: err }
+  } finally {
+    loading.value = false
+  }
+}
 
   async function logout() {
     accessToken.value = null
@@ -61,11 +87,21 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
 async function fetchMe() {
-  const api = useApi()
-  const res: any = await api('/api/auth/me')
-  user.value = res.data
+  try {
+    const api = useApi()
+    const res: any = await api('/api/auth/me')
+    user.value = res.data
+  } catch (e) {
+    // token inválido → logout silencioso
+    await logout()
+  }
 }
 
+function setSession(data: any) {
+  accessToken.value = data.token
+  refreshToken.value = data.refreshToken
+  user.value = data.user
+}
 
   return {
     accessToken,
@@ -77,5 +113,6 @@ async function fetchMe() {
     logout,
     refresh,
     fetchMe,
+    register
   }
 })

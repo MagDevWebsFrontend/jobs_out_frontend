@@ -1,4 +1,4 @@
-import type { Municipio } from '#shared/types/structures'
+import type { MunicipioEntity } from '#shared/types/structures'
 
 export const useMunicipios = () => {
   const municipios = ref<Municipio[]>([])

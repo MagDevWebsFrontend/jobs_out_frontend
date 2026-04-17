@@ -97,7 +97,7 @@
         type="submit"
         class="w-full"
         :loading="loading"
-        :disabled="!form.terms || usernameAvailable === false"
+        :disabled="!form.terms || usernameAvailable !== true"
       >
         Crear cuenta
       </UiButton>
@@ -109,8 +109,10 @@
 import { ref, reactive, watch } from 'vue'
 import { useApi } from '~/composables/useApi'
 import LocationSelector from '~/components/forms/LocationSelector.vue'
+import { useAuthStore } from '~/stores/auth'
 
 const api = useApi()
+const auth = useAuthStore()
 
 /* ===========================
    FORM
@@ -134,6 +136,7 @@ const loading = ref(false)
 =========================== */
 const usernameChecking = ref(false)
 const usernameAvailable = ref<boolean | null>(null)
+const lastCheckedUsername = ref('')
 
 const debounce = <T extends (...args: any[]) => void>(fn: T, delay = 500) => {
   let t: ReturnType<typeof setTimeout>
@@ -144,33 +147,52 @@ const debounce = <T extends (...args: any[]) => void>(fn: T, delay = 500) => {
 }
 
 const checkUsername = async (username: string) => {
-  if (username.length < 3) return
+  // 🔒 validación básica
+  if (!username || username.length < 3) {
+    usernameAvailable.value = null
+    return
+  }
+
+  lastCheckedUsername.value = username
   usernameChecking.value = true
+
   try {
     const res = await api<{ available: boolean }>(
       '/api/auth/availability',
       { params: { username } }
     )
-    usernameAvailable.value = res.available
+
+    // 🧠 evitar race conditions
+    if (lastCheckedUsername.value === username) {
+      usernameAvailable.value = res.available
+    }
+
   } catch {
     usernameAvailable.value = null
   } finally {
-    usernameChecking.value = false
+    if (lastCheckedUsername.value === username) {
+      usernameChecking.value = false
+    }
   }
 }
 
-const debouncedCheck = debounce(checkUsername)
+const debouncedCheck = debounce(checkUsername, 500)
 
 watch(() => form.username, (val) => {
-  usernameAvailable.value = null
   errors.username = ''
-  if (val) debouncedCheck(val)
-})
+  usernameAvailable.value = null
 
+  if (!val || val.length < 3) return
+
+  debouncedCheck(val)
+})
 /* ===========================
    SUBMIT
 =========================== */
 const handleSubmit = async () => {
+  // Reset errores
+  Object.keys(errors).forEach(k => (errors[k] = ''))
+
   if (!form.municipio_id) {
     errors.municipio_id = 'Seleccione una ubicación'
     return
@@ -181,24 +203,35 @@ const handleSubmit = async () => {
     return
   }
 
+  if (form.password !== form.confirmPassword) {
+    errors.confirmPassword = 'Las contraseñas no coinciden'
+    return
+  }
+
   loading.value = true
   try {
-    await api('/api/auth/register', {
-      method: 'POST',
-      body: {
-        nombre: form.nombre,
-        username: form.username,
-        email: form.email,
-        password_hash: form.password,
-        telefono_e164: form.telefono_e164,
-        municipio_id: form.municipio_id
-      }
+    const result = await auth.register({
+      nombre: form.nombre,
+      username: form.username,
+      email: form.email,
+      password: form.password, // 🔥 CORRECTO
+      telefono_e164: form.telefono_e164,
+      municipio_id: form.municipio_id
     })
 
-    await navigateTo('/auth/login')
+    if (!result.success) {
+      throw result.error
+    }
+
+    // 🔥 AUTO LOGIN + REDIRECCIÓN
+    await navigateTo('/profile/edit')
+
   } catch (err: any) {
     if (err?.status === 409) {
       errors.username = 'Usuario ya existe'
+    } else if (err?.data?.message) {
+      // opcional: manejar errores del backend
+      console.error(err.data.message)
     }
   } finally {
     loading.value = false

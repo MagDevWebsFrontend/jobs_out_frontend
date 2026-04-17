@@ -1,4 +1,4 @@
-import type { Provincia } from '#shared/types/structures'
+import type { ProvinciaEntity } from '#shared/types/structures'
 
 export const useProvincias = () => {
   const provincias = ref<Provincia[]>([])

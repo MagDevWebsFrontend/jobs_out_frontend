@@ -1,4 +1,3 @@
-<!-- pages/profile/edit.vue -->
 <template>
   <div class="min-h-screen bg-gray-50">
     <!-- Header -->
@@ -18,7 +17,7 @@
             <button
               type="button"
               @click="navigateBack"
-              class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors"
+              class="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium"
             >
               Cancelar
             </button>
@@ -27,7 +26,7 @@
               type="submit"
               form="profile-form"
               :disabled="loading"
-              class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
               <span v-if="loading">Guardando...</span>
               <span v-else>Guardar Cambios</span>
@@ -42,15 +41,15 @@
       <form
         id="profile-form"
         @submit.prevent="submitForm"
-        class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 md:p-8"
+        class="bg-white rounded-xl shadow-sm border p-6 md:p-8"
       >
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <!-- Columna izquierda -->
+
+          <!-- IZQUIERDA -->
           <div class="space-y-6">
             <Input
               v-model="form.nombre"
               label="Nombre completo *"
-              placeholder="Tu nombre completo"
               required
               :error="errors.nombre"
             />
@@ -69,45 +68,49 @@
             </p>
           </div>
 
-          <!-- Columna derecha -->
+          <!-- DERECHA -->
           <div class="space-y-6">
-            <!-- Avatar (placeholder por ahora) -->
+
+            <!-- AVATAR -->
             <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              <h3 class="text-lg font-semibold mb-4">
                 Foto de Perfil
               </h3>
 
-              <div class="p-4 border border-dashed rounded-lg text-sm text-gray-500">
-                La foto de perfil se podrá editar próximamente.
-              </div>
+              <ImageUpload v-model="avatarFile" />
+
+              <img
+                v-if="avatarPreview || form.avatar_url"
+                :src="avatarPreview || form.avatar_url"
+                class="mt-4 w-24 h-24 rounded-full object-cover border"
+              />
             </div>
 
-            <!-- Ubicación -->
+            <!-- UBICACIÓN -->
             <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-4">
+              <h3 class="text-lg font-semibold mb-4">
                 Ubicación
               </h3>
 
               <LocationSelector v-model="form.municipio_id" />
 
-              <p v-if="errors.municipio_id" class="mt-1 text-sm text-red-600">
+              <p v-if="errors.municipio_id" class="text-sm text-red-600 mt-1">
                 {{ errors.municipio_id }}
               </p>
             </div>
+
           </div>
         </div>
       </form>
 
-      <!-- Loading overlay -->
+      <!-- LOADING -->
       <div
         v-if="loading"
         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
       >
         <div class="bg-white rounded-lg p-8 text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p class="text-gray-700 font-medium">
-            Actualizando perfil...
-          </p>
+          <div class="animate-spin h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p>Actualizando perfil...</p>
         </div>
       </div>
     </main>
@@ -120,7 +123,7 @@ definePageMeta({
   middleware: 'auth'
 })
 
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '~/stores/auth'
 import { useApi } from '~/composables/useApi'
@@ -128,25 +131,23 @@ import { useApi } from '~/composables/useApi'
 import ContactForm from '~/components/forms/ContactForm.vue'
 import LocationSelector from '~/components/forms/LocationSelector.vue'
 import Input from '~/components/ui/Input.vue'
+import ImageUpload from '~/components/forms/ImageUpload.vue'
 
-/* =========================
-   DEPENDENCIAS
-========================= */
 const router = useRouter()
 const api = useApi()
 const auth = useAuthStore()
 
-/* =========================
-   ESTADO
-========================= */
 const loading = ref(false)
+
+const avatarFile = ref<File | null>(null)
+const avatarPreview = ref<string | null>(null)
 
 const form = reactive({
   nombre: '',
   email: '',
   telefono_e164: '',
   municipio_id: '',
-  avatar_url: null as string | null
+  avatar_url: undefined as string | undefined
 })
 
 const errors = reactive<Record<string, string>>({
@@ -157,31 +158,39 @@ const errors = reactive<Record<string, string>>({
 })
 
 /* =========================
-   CARGAR PERFIL
+   PREVIEW
 ========================= */
-onMounted(async () => {
-  if (!auth.user?.id) return
-
-  loading.value = true
-  try {
-    const res: any = await api(`/api/usuarios/${auth.user.id}`)
-
-    Object.assign(form, {
-      nombre: res.data.nombre,
-      email: res.data.email,
-      telefono_e164: res.data.telefono_e164,
-      municipio_id: res.data.municipio_id,
-      avatar_url: res.data.avatar_url ?? null
-    })
-  } catch (e) {
-    console.error('Error cargando perfil', e)
-  } finally {
-    loading.value = false
+watch(avatarFile, (file) => {
+  if (avatarPreview.value) {
+    URL.revokeObjectURL(avatarPreview.value)
   }
+
+  avatarPreview.value = file
+    ? URL.createObjectURL(file)
+    : null
 })
 
 /* =========================
-   VALIDACIÓN BÁSICA
+   LOAD USER
+========================= */
+onMounted(async () => {
+  if (!auth.user) {
+    await auth.fetchMe()
+  }
+
+  if (!auth.user) return
+
+  Object.assign(form, {
+    nombre: auth.user.nombre,
+    email: auth.user.email,
+    telefono_e164: auth.user.telefono_e164,
+    municipio_id: auth.user.municipio_id,
+    avatar_url: auth.user.avatar_url ?? undefined
+  })
+})
+
+/* =========================
+   VALIDATION
 ========================= */
 const validateForm = () => {
   Object.keys(errors).forEach(k => (errors[k] = ''))
@@ -213,25 +222,41 @@ const submitForm = async () => {
   if (!auth.user?.id) return
 
   loading.value = true
+
   try {
+    let avatarUrl = form.avatar_url
+
+    // 🔥 subir avatar
+    if (avatarFile.value) {
+      const fd = new FormData()
+      fd.append('imagen', avatarFile.value)
+
+      const uploadRes: any = await api('/api/uploads/avatar', {
+        method: 'POST',
+        body: fd
+      })
+
+      avatarUrl = uploadRes.data.url
+    }
+
     const res: any = await api(`/api/usuarios/${auth.user.id}`, {
       method: 'PUT',
       body: {
-        nombre: form.nombre,
-        email: form.email,
+        nombre: form.nombre.trim(),
+        email: form.email.trim(),
         telefono_e164: form.telefono_e164,
         municipio_id: form.municipio_id,
-        avatar_url: null
+        avatar_url: avatarUrl
       }
     })
 
-    // 🔥 sincronizar auth store
     auth.user = {
       ...auth.user,
       ...res.data
     }
 
     await router.push('/profile')
+
   } catch (e: any) {
     if (e?.status === 409) {
       errors.email = 'Este correo ya está en uso'
@@ -241,10 +266,5 @@ const submitForm = async () => {
   }
 }
 
-/* =========================
-   NAVEGACIÓN
-========================= */
-const navigateBack = () => {
-  router.back()
-}
+const navigateBack = () => router.back()
 </script>
