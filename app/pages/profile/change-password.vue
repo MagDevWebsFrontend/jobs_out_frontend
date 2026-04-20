@@ -62,10 +62,10 @@
 <script setup lang="ts">
 import Toast from '~/components/ui/Toast.vue'
 
-
-  definePageMeta({
+definePageMeta({
   layout: 'form-layout'
 })
+
 const form = reactive({
   password: '',
   passwordNew: ''
@@ -76,6 +76,10 @@ const { cambiarContrasena, loading } = useProfile()
 const toast = useToast()
 
 const handleSubmit = async () => {
+  // ✅ limpiar errores antes de enviar
+  errors.password = ''
+  errors.passwordNew = ''
+
   try {
     await cambiarContrasena({
       currentPassword: form.password,
@@ -87,7 +91,10 @@ const handleSubmit = async () => {
     navigateTo('/profile')
   } catch (e: any) {
     console.error(e)
-    errors.password = 'Credenciales incorrectas'
+
+    // ✅ usa el mensaje real del backend
+    errors.password = e.message || 'Error al cambiar contraseña'
+
     toast.show(e.message || 'Error al cambiar contraseña', 'error')
   }
 }

@@ -1,14 +1,14 @@
 export const useProfile = () => {
   const api = useApi()
   const loading = ref(false)
-  const error = ref<string | null>(null)
+  const error = ref<string | undefined>(undefined)
 
   const cambiarContrasena = async (data: {
     currentPassword: string 
     newPassword: string
   }) => {
     loading.value = true
-    error.value = null
+    error.value = undefined
 
     try {
       const res: any = await api('/api/auth/change-password', {
