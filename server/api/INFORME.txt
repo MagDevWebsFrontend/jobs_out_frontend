@@ -1,0 +1,37 @@
+INFORME (server/api/)
+=====================
+
+Objetivo
+--------
+Endpoints Nitro (`defineEventHandler`) para exponer funcionalidades al frontend.
+
+Propuesta de endpoints (no implementados aun)
+---------------------------------------------
+1) Healthcheck
+   - GET `/api/estado`
+     - Respuesta: { ok: true, timestamp, env, version }
+     - Uso: monitoreo, debugging, CI smoke tests.
+
+2) Helpers (utilidades)
+   - POST `/api/generar-slug`
+     - Body: { texto: string }
+     - Respuesta: { slug: string }
+     - Uso: normalizar titulos de publicaciones.
+
+3) BFF / Agregacion (alto valor)
+   - GET `/api/resumen-inicio`
+     - Llama al backend (API_BASE_URL) y retorna un payload "listo" para la UI (menos roundtrips).
+   - GET `/api/resumen-jobs`
+     - Ejemplo: trabajos + guardados + filtros (segun UI).
+
+4) Proxy (opcional)
+   - `/api/proxy/*` (si decidimos que el cliente no llame directo al backend)
+     - Manejo centralizado de Authorization/cookies y refresh.
+
+Notas de implementacion (cuando lo hagamos)
+-------------------------------------------
+- Usar `useRuntimeConfig()` para leer `public.apiBaseUrl` (o config privada si aplica).
+- Manejar errores con `createError({ statusCode, statusMessage })`.
+- Validar input con checks simples (o zod si decidimos agregarlo).
+- Agregar tests (unit) para endpoints criticos.
+

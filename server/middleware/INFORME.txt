@@ -1,0 +1,15 @@
+INFORME (server/middleware/)
+============================
+
+Objetivo
+--------
+Middleware Nitro (opcional) para preocupaciones cross-cutting:
+
+- logging basico de requests/responses (solo en dev)
+- rate limiting (si exponemos endpoints publicos)
+- headers de seguridad (si aplica)
+
+Nota
+----
+Esto es opcional. Si solo usamos `server/api` como BFF interno, quizas no haga falta.
+

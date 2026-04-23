@@ -1,0 +1,65 @@
+INFORME (tests/)
+=================
+
+Objetivo
+--------
+Tomar como referencia el repo "Proyecto-Node-Nuxt-Frontend" (Addppz) y llevar este proyecto a un
+estado similar (o mejor) en calidad de pruebas: documentacion clara, estructura mantenible y
+casos E2E/unit que cubran los flujos mas importantes.
+
+Estado actual (este repo)
+-------------------------
+- Unit (Vitest): `tests/unit/*.spec.ts`
+  - `tests/unit/EditProfile.spec.ts` (page `/profile/edit`)
+  - `tests/unit/LocationSelector.spec.ts` (component `LocationSelector`)
+  - Setup: `tests/setup.ts` (mock de `useRuntimeConfig`, stubs de `definePageMeta`/`useHead`)
+  - Config: `vitest.config.ts` (environment: jsdom)
+- E2E (Playwright): `tests/e2e/*.e2e.ts`
+  - `tests/e2e/profile.e2e.ts` (login + editar perfil)
+  - Config: `playwright.config.ts` (baseURL localhost:3000)
+- Carpeta `server/` esta vacia (no hay endpoints Nitro propios aun).
+
+Que queremos hacer (propuesta)
+------------------------------
+1) Documentacion de pruebas (tipo "didactica")
+   - Crear una guia similar a `tests/README.md` + explicacion (por que/como correr pruebas,
+     convenciones, y como mockear API).
+   - Definir "reglas" de naming:
+     - Unit: `*.spec.ts` (se queda como esta).
+     - E2E: `*.e2e.ts` (se queda como esta).
+
+2) E2E: Journeys que valen mas (alta prioridad)
+   - Auth: login / registro / logout / refresh token (si aplica).
+   - Jobs: listar -> ver detalle -> guardar (guardados) -> desguardar.
+   - Jobs CRUD: crear borrador -> editar -> publicar -> eliminar.
+   - Profile: ver -> editar -> subir avatar (si existe) -> cambiar password.
+   - Admin (si tenemos usuario admin en entorno): dashboard -> users -> comunicado.
+
+3) Unit: Cobertura de composables/stores (alta prioridad)
+   - Stores: `app/stores/auth.ts`, `app/stores/trabajos.ts`, `app/stores/guardados.ts`,
+     `app/stores/publicacion.ts`.
+   - Composables: `app/composables/useApi.ts`, `app/composables/useProfile.ts`,
+     `app/composables/useCrearPublicacion.ts`, `app/composables/useImageUrl.ts`.
+   - Componentes: forms y UI criticos (`LocationSelector`, uploads, headers, etc).
+
+4) Mocks/fixtures (para que las pruebas no dependan tanto del backend)
+   - Agregar `tests/fixtures/` para respuestas JSON tipicas.
+   - Agregar `tests/mocks/` para handlers (ideal: MSW) y utilidades de mock.
+   - Definir si E2E corre contra backend real (recomendado) o contra "mock backend" local.
+
+Opciones (para decidir despues)
+------------------------------
+A) "E2E contra backend real" (recomendado para empezar)
+   - Pros: valida integracion real.
+   - Contras: dependemos de datos/usuarios/semillas.
+
+B) "BFF / Mock API local con Nitro" (similar al repo de referencia)
+   - Crear endpoints en `server/api/*` que agreguen / proxy / mockeen datos.
+   - Pros: E2E mas estable; menos CORS; mejor SSR.
+   - Contras: hay que mantener esa capa.
+
+Siguiente paso
+--------------
+Elegir 1-2 flujos E2E y 1-2 unit tests prioritarios (ej: Jobs guardar/desguardar + store auth),
+y decidir si vamos por (A) backend real o (B) server/api BFF.
+

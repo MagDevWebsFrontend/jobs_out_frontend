@@ -1,0 +1,19 @@
+INFORME (tests/fixtures/)
+========================
+
+Objetivo
+--------
+Guardar datos estaticos (JSON o TS) para reutilizarlos en unit/e2e (mocks de API, usuarios, trabajos,
+provincias/municipios, etc.).
+
+Propuesta
+---------
+- `tests/fixtures/user.json`
+- `tests/fixtures/trabajo.json`
+- `tests/fixtures/provincias.json`
+- `tests/fixtures/municipios.json`
+
+Regla
+-----
+Los fixtures deben ser pequenos, sin datos sensibles y estables (sin IDs aleatorios si no hace falta).
+

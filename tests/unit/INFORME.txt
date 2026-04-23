@@ -1,0 +1,36 @@
+INFORME (tests/unit/)
+====================
+
+Objetivo
+--------
+Pruebas unitarias con Vitest + Vue Test Utils para validar logica de componentes/pages/stores sin
+dependencia fuerte del backend.
+
+Estado actual
+-------------
+- `EditProfile.spec.ts`:
+  - mock de `useApi`, mock de `useRouter`, mock de `useAuthStore`
+  - valida carga inicial y submit (PUT) + redireccion
+- `LocationSelector.spec.ts`:
+  - mock de `useApi` y valida carga de municipios al seleccionar provincia
+
+Propuesta (similar a la idea del repo de referencia)
+---------------------------------------------------
+1) Cubrir stores y composables primero (alto ROI)
+   - `app/stores/auth.ts`:
+     - login() setea tokens/user
+     - refresh() reintenta y fuerza logout si falla
+     - fetchMe() maneja token invalido
+   - `app/composables/useApi.ts`:
+     - adjunta Authorization
+     - reintenta una vez en 401 luego de refresh
+2) Componentes criticos
+   - componentes de forms (validaciones), y los que consumen API.
+3) Fixtures/mocks reusables
+   - mover mocks repetidos a `tests/mocks/` y respuestas a `tests/fixtures/`.
+
+Nota tecnica
+------------
+Actualmente `vitest.config.ts` incluye `tests/unit/**/*.spec.ts` y corre con `jsdom`.
+Si queremos mas velocidad, podemos evaluar `happy-dom` mas adelante (decision opcional).
+

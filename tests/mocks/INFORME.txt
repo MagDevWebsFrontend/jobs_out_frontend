@@ -1,0 +1,19 @@
+INFORME (tests/mocks/)
+=====================
+
+Objetivo
+--------
+Centralizar mocks reusables para pruebas (Vitest) y/o handlers de API (ideal: MSW).
+
+Propuesta
+---------
+- `tests/mocks/handlers.ts` (MSW handlers por endpoint)
+- `tests/mocks/server.ts` (setup MSW para Vitest)
+- `tests/mocks/factories.ts` (factory functions para data de prueba)
+
+Decision pendiente
+-----------------
+Este repo ya tiene `msw` en devDependencies. Podemos decidir si:
+- lo usamos para unit tests (recomendado para reducir mocks manuales de `useApi`)
+- o mantenemos mocks puntuales como ahora (rapido para 1-2 tests, pero escala peor)
+

@@ -1,0 +1,48 @@
+INFORME (tests/e2e/)
+===================
+
+Objetivo
+--------
+E2E con Playwright para cubrir los flujos reales del usuario (happy paths + errores comunes).
+
+Estado actual
+-------------
+- Hay 3 pruebas:
+  - `smoke.e2e.ts` (landing -> link a registro)
+  - `auth.login.e2e.ts` (login -> dashboard /jobs)
+  - `profile.e2e.ts` (login -> editar perfil -> guardar -> verificar en /profile)
+- Utilidades:
+  - `tests/e2e/utils/env.ts` (E2E_BASE_URL, E2E_USERNAME, E2E_PASSWORD)
+  - `tests/e2e/utils/auth.ts` (helper `login(page)`)
+
+Propuesta de estructura
+-----------------------
+- Mantener `tests/e2e/*.e2e.ts` (compatible con `playwright.config.ts` actual).
+- Agregar carpetas (si hace falta) para ordenar sin romper nada:
+  - `tests/e2e/flows/` (journeys completos)
+  - `tests/e2e/pages/` (Page Objects)
+  - `tests/e2e/utils/` (helpers: login(), seed(), etc.)
+
+Lista de pruebas sugeridas (prioridad)
+-------------------------------------
+1) Auth
+   - login ok
+   - login fail (mensaje de error)
+   - register ok (si el backend lo permite en dev)
+   - refresh token / session persist (si aplica)
+2) Jobs
+   - /jobs: lista carga y filtra (si hay UI)
+   - guardar / desguardar desde card y desde detalle
+   - crear borrador -> aparece en "mis trabajos"
+   - publicar -> aparece en listado publico (segun reglas)
+3) Profile
+   - cambiar password (happy + validations)
+4) Admin (solo si tenemos un usuario admin estable en entorno)
+   - acceso protegido por middleware
+   - listar usuarios
+   - enviar comunicado
+
+Dependencias (a decidir)
+-----------------------
+- Recomendado: correr E2E con backend real (datos estables o seed).
+- Alternativa: usar endpoints Nitro en `server/api` como BFF/mock para estabilizar tests.

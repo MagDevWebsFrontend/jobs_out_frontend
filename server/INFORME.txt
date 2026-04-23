@@ -1,0 +1,44 @@
+INFORME (server/)
+=================
+
+Objetivo
+--------
+Agregar una capa "server-side" (Nitro) similar al repo de referencia para:
+- endpoints propios (healthcheck, helpers)
+- BFF (Backend For Frontend): agregacion/proxy hacia el backend real
+- evitar problemas de CORS y mejorar SSR (fetch desde el servidor)
+- centralizar auth/headers/cookies en un solo lugar
+
+Estado actual (este repo)
+-------------------------
+- `server/` esta vacio.
+- El frontend consume el backend directo via `API_BASE_URL` (ver `.env`, `nuxt.config.ts`).
+- Hay helper `app/composables/useApi.ts` y un plugin `app/plugins/api.ts` (ambos crean $fetch).
+
+Propuesta de estructura (solo carpetas por ahora)
+------------------------------------------------
+- `server/api/`:
+  - endpoints Nitro (`*.get.ts`, `*.post.ts`, etc.)
+- `server/utils/`:
+  - helper `fetchBackend()` (baseURL + manejo de errores)
+  - helper de auth (leer token/cookie, adjuntar headers)
+- `server/middleware/` (si hace falta):
+  - middleware Nitro para logging, rate-limit (opcional)
+
+Endpoints propuestos (inspirados en el repo de referencia)
+---------------------------------------------------------
+- `GET /api/estado`
+  - retorna { ok, timestamp, version } para healthcheck y debugging.
+- `POST /api/generar-slug`
+  - util para normalizar titulos (si lo necesitamos).
+- `POST /api/suscribir-*`
+  - ejemplo: suscripcion a alertas de empleo (si aplica).
+- `GET /api/resumen-*`
+  - BFF: junta datos del backend en una sola llamada para la home/dashboard.
+
+Decision pendiente (importante)
+-------------------------------
+1) Usamos `server/api` solo para endpoints "helpers" y seguimos consumiendo backend directo desde el cliente.
+2) Migramos a BFF: el cliente llama solo a `/api/*` local y Nitro proxy hacia el backend.
+   (Esto suele simplificar CORS y SSR, pero agrega una capa que hay que mantener.)
+

@@ -1,0 +1,17 @@
+INFORME (server/utils/)
+======================
+
+Objetivo
+--------
+Helpers compartidos para endpoints Nitro (server/api) y posibles middlewares.
+
+Propuesta (para mas adelante)
+-----------------------------
+- `fetchBackend.ts`
+  - wrapper sobre `$fetch` con baseURL, headers comunes, timeouts, y mapeo de errores.
+- `auth.ts`
+  - leer tokens desde cookies/headers
+  - adjuntar Authorization cuando se proxyee al backend
+- `validation.ts`
+  - helpers de validacion (strings, ids, etc.)
+

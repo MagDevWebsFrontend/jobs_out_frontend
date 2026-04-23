@@ -1,0 +1,14 @@
+INFORME (tests/utils/)
+=====================
+
+Objetivo
+--------
+Helpers compartidos para pruebas (unit y e2e).
+
+Ideas
+-----
+- helpers de fecha/timeout
+- `loginAs(page, user)` para Playwright
+- `flushAll()`/`nextTick` wrappers para unit tests
+- helpers para montar componentes con plugins/stores
+
